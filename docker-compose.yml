@@ -1,0 +1,23 @@
+version: "3"
+services:
+    web1:
+      build: ./simple-route-app
+      container_name: web1
+      environment:
+        - PORT=8080
+      ports:
+          - "81:8080"
+
+    web2:
+      build: ./simple-route-app
+      container_name: web2
+      environment:
+        - PORT=8081
+      ports:
+          - "82:8081"
+
+    haproxy:
+      build: ./haproxy
+      container_name: haproxy
+      ports:
+        - "80:80"
