@@ -8,6 +8,15 @@ services:
       ports:
           - "81:8080"
 
+    web3:
+      build: ./simple-route-app
+      container_name: web3
+      environment:
+        - PORT=8082
+      ports:
+        - "83:8082"
+
+
     web2:
       build: ./simple-route-app
       container_name: web2
@@ -15,6 +24,14 @@ services:
         - PORT=8081
       ports:
           - "82:8081"
+    web4:
+      build: ./simple-route-app
+      container_name: web4
+      environment:
+        - PORT=8083
+      ports:
+        - "84:8083"
+
 
     haproxy:
       build: ./haproxy
