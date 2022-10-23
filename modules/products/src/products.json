@@ -1,0 +1,59 @@
+{
+  "products": [
+    {
+      "id": "3F2F6E6E-AAC5-699A-3346-3CAC49F9F40E",
+      "productName": "dolor. Nulla semper",
+      "productSubTitle": "egestas. Aliquam fringilla cursus purus. Nullam scelerisque neque sed sem",
+      "productDescription": "sem. Pellentesque ut ipsum ac mi eleifend egestas. Sed pharetra, felis",
+      "category": "vulputate,",
+      "subCategory": "bibendum",
+      "price": 5716,
+      "link": "http://nytimes.com?p=8",
+      "overallRanking": -2.46
+    },
+    {
+      "id": "583679BB-119A-93CA-CF05-67949673BE31",
+      "productName": "tincidunt, neque vitae",
+      "productSubTitle": "elit, dictum eu, eleifend nec, malesuada ut, sem. Nulla interdum.",
+      "productDescription": "consequat dolor vitae dolor. Donec fringilla. Donec feugiat metus sit",
+      "category": "adipiscing",
+      "subCategory": "tincidunt,",
+      "price": 7441,
+      "link": "http://twitter.com?k=0",
+      "overallRanking": 0.70
+    },
+    {
+      "id": "A8370043-1B8E-3D9E-4983-446CAA2BC8A1",
+      "productName": "tempor, est ac",
+      "productSubTitle": "vitae risus. Duis a mi fringilla mi lacinia mattis. Integer",
+      "productDescription": "Praesent luctus. Curabitur egestas nunc sed libero. Proin sed turpis nec mauris blandit",
+      "category": "primis",
+      "subCategory": "nec",
+      "price": 6637,
+      "link": "http://netflix.com?ad=115",
+      "overallRanking": 4.62
+    },
+    {
+      "id": "70F3BD9E-F7DA-52DC-8320-5EE54873D071",
+      "productName": "rhoncus. Donec est.",
+      "productSubTitle": "non dui nec urna suscipit nonummy. Fusce fermentum fermentum arcu.",
+      "productDescription": "Quisque ac libero nec ligula consectetuer rhoncus. Nullam velit dui, semper et,",
+      "category": "sed",
+      "subCategory": "Cras",
+      "price": 2962,
+      "link": "http://yahoo.com?str=se",
+      "overallRanking": 0.84
+    },
+    {
+      "id": "735041B1-9AC8-AA48-122F-137EEEAAD6F4",
+      "productName": "nec luctus felis",
+      "productSubTitle": "Mauris vel turpis. Aliquam adipiscing lobortis risus. In mi pede,",
+      "productDescription": "faucibus lectus, a sollicitudin orci sem eget massa. Suspendisse eleifend. Cras sed",
+      "category": "ipsum.",
+      "subCategory": "sapien.",
+      "price": 1410,
+      "link": "http://bbc.co.uk?q=0",
+      "overallRanking": 2.93
+    }
+  ]
+}
