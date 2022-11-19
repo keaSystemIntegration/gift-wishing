@@ -1,14 +1,14 @@
 version: '3.4'
 
 services:
-  user-service:
+  user-service-development:
     build:
-      context: .
+      context: ./modules/user-service
       target: development
     environment:
       - NODE_ENV=development
     volumes:
-      - ./:/usr/src/app
+      - ./modules/user-service:/usr/src/app
       - /usr/src/app/node_modules
     ports:
       - 3000:3000

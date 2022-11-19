@@ -1,9 +1,9 @@
 version: '3.4'
 
 services:
-  api:
+  user-service:
     build:
-      context: .
+      context: ./modules/user-service
       target: production
 
     ports:
