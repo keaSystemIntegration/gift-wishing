@@ -8,33 +8,57 @@ services:
         - PORT=8080
       ports:
           - "81:8080"
-    web3:
-      build: ./simple-route-app
-      container_name: web3
-      environment:
-        - PORT=8082
-      ports:
-        - "83:8082"
-
-
-    web2:
-      build: ./simple-route-app
-      container_name: web2
-      environment:
-        - PORT=8081
-      ports:
-          - "82:8081"
-    web4:
-      build: ./simple-route-app
-      container_name: web4
-      environment:
-        - PORT=8083
-      ports:
-        - "84:8083"
-
 
     haproxy:
       build: ./haproxy
       container_name: haproxy
       ports:
         - "80:80"
+
+    rabbitmq-server:
+      container_name: rabbitmq-server
+      build: ./modules/rabbitmq-server
+      environment:
+        - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
+      ports:
+        - "5672:5672"
+        - "15672:15672"
+
+    sftp-server:
+      container_name: sftp-server
+      build: ./modules/sftp-server
+      volumes:
+        - sftp-upload:/home/$SFTP_USER/upload
+      ports:
+        - "22:22"
+      environment:
+        - SFTP_USER=$SFTP_USER
+        - QUEUE_ENDPOINT=$QUEUE_ENDPOINT
+        - RABBITMQ_SERVER=$RABBITMQ_SERVER
+        - RABBITMQ_USER=$RABBITMQ_USER
+        - RABBITMQ_PASSWORD=RABBITMQ_PASSWORD
+      command: $SFTP_USER:$SFTP_PASSWORD:1001
+      depends_on:
+        - rabbitmq-server
+
+    products-service:
+      build: ./modules/products
+      container_name: products-service
+      environment:
+        - PORT=8085
+        - DATABASE_URL=file:./../sqlite/products.db
+        - SFTP_URL=$SFTP_URL
+        - SFTP_USERNAME=$SFTP_USER
+        - SFTP_PASSWORD=$SFTP_PASSWORD
+        - RABBITMQ_SERVER=$RABBITMQ_SERVER
+      ports:
+        - "85:8085"
+      restart: on-failure #find a better solution for timing the docker image
+      depends_on:
+        - sftp-server
+        - rabbitmq-server
+
+volumes:
+  sftp-upload:
+
+

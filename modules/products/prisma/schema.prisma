@@ -1,0 +1,21 @@
+generator client {
+  provider = "prisma-client-js"
+  output = "./client"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model products {
+  id           String @id
+  name         String
+  subTitle     String   @map("sub_title")
+  description  String
+  category     String
+  subCategory  String   @map("sub_category")
+  price        Float
+  link         String
+  overallRank  Float    @map("overall_rank")
+}

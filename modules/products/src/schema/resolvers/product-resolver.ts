@@ -6,13 +6,13 @@ export class Product {
     id!: string
 
     @Field()
-    productName!: string
+    name!: string
 
     @Field()
-    productSubTitle!: string
+    subTitle!: string
 
     @Field()
-    productDescription!: string
+    description!: string
 
     @Field()
     category!: string

@@ -1,0 +1,62 @@
+{
+  "rabbit_version": "3.11.3",
+  "rabbitmq_version": "3.11.3",
+  "product_name": "RabbitMQ",
+  "product_version": "3.11.3",
+  "users": [
+    {
+      "name": "user",
+      "password_hash": "q3VprpiuSglktIEdYDNI/FzGvsNMZvrRSTUzdNmCMkDpEE4R",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": [
+        "administrator"
+      ],
+      "limits": {}
+    },
+    {
+      "name": "admin",
+      "password_hash": "/fa2fMCGZgbXZNO+mC0/SW3SHSM2Bu6Snfp9GwF5aOIJVGCb",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": [
+        "administrator"
+      ],
+      "limits": {}
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "/"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "admin",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "topic_permissions": [],
+  "parameters": [],
+  "global_parameters": [
+    {
+      "name": "internal_cluster_id",
+      "value": "rabbitmq-cluster-id-1R_DAYqP4vxivMDPh1actA"
+    }
+  ],
+  "policies": [],
+  "queues": [],
+  "exchanges": [
+    {
+      "name": "upload-db",
+      "vhost": "/",
+      "type": "fanout",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": []
+}
