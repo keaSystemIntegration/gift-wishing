@@ -421,3 +421,4 @@ fabric.properties
 /.idea/gift-wishing.iml
 /.idea/modules.xml
 /.idea/vcs.xml
+package-lock.json
