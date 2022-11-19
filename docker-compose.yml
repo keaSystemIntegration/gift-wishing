@@ -36,7 +36,7 @@ services:
         - QUEUE_ENDPOINT=$QUEUE_ENDPOINT
         - RABBITMQ_SERVER=$RABBITMQ_SERVER
         - RABBITMQ_USER=$RABBITMQ_USER
-        - RABBITMQ_PASSWORD=RABBITMQ_PASSWORD
+        - RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD
       command: $SFTP_USER:$SFTP_PASSWORD:1001
       depends_on:
         - rabbitmq-server
@@ -51,6 +51,9 @@ services:
         - SFTP_USERNAME=$SFTP_USER
         - SFTP_PASSWORD=$SFTP_PASSWORD
         - RABBITMQ_SERVER=$RABBITMQ_SERVER
+        - RABBITMQ_USER=$RABBITMQ_USER
+        - RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD
+
       ports:
         - "85:8085"
       restart: on-failure #find a better solution for timing the docker image

@@ -6,12 +6,6 @@ RUN apt-get update && \
     apt-get -y install python3-pip && \
     pip install pika
 
-#poetry config
-
-# Add `poetry` to PATH
-# ENV PATH="${PATH}:${POETRY_VENV}/bin
-
-EXPOSE 22
 
 # python script
 COPY ./publisher /publisher
@@ -22,4 +16,6 @@ COPY ./sftp-config.sh /etc/sftp.d/sftp-config.sh
 # file changes listeern script
 COPY ./publish-update.sh /etc/sftp.d/publish-update.sh
 RUN ["chmod", "+x", "./etc/sftp.d/publish-update.sh"]
+EXPOSE 22
+
 ENTRYPOINT ["/entrypoint"]

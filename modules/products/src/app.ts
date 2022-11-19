@@ -8,8 +8,8 @@ import ampq from 'amqplib/callback_api'
 
 dotenv.config()
 const PORT = process.env.PORT
-const rabbitMQServer = process.env.RABBITMQ_SERVER || 'localhost'
-const rabbitMQAdmin = process.env.RABBITMQ_USER || 'user'
+const rabbitMQServer = process.env.RABBITMQ_SERVER || 'example.com'
+const rabbitMQAdmin = process.env.RABBITMQ_USER || 'username'
 const rabbitMQPassword = process.env.RABBITMQ_PASSWORD || 'password'
 
 ampq.connect(
