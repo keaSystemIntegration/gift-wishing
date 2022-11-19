@@ -8,15 +8,24 @@ services:
     volumes:
       - ./haproxy:/usr/local/etc/haproxy
 
-  example-service:
-    image: example-service
+  auth-service:
+    image: auth-service
     environment:
-      - APPID=1111
-  nodeapp2:
-    image: example-service
-    environment:
-      - APPID=2222
-  nodeapp3:
-    image: example-service
-    environment:
-      - APPID=3333
+      - APPID=4500
+      - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_DATABASE=${MONGO_DATABASE}
+      - JWT_SECRET=${JWT_SECRET}
+
+  # example-service:
+  #   image: example-service
+  #   environment:
+  #     - APPID=1111
+  # nodeapp2:
+  #   image: example-service
+  #   environment:
+  #     - APPID=2222
+  # nodeapp3:
+  #   image: example-service
+  #   environment:
+  #     - APPID=3333

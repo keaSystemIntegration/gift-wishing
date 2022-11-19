@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { cryptAsync } from '../utils/cryptPasword.js';
 
 const authUserSchema = new mongoose.Schema({
