@@ -46,6 +46,11 @@ services:
       - sftp-server
       - rabbitmq-server
 
+  user-service: 
+    build:
+      context: ./modules/user-service
+      target: production
+
 volumes:
   sftp-upload:
     driver: azure_file
