@@ -4,8 +4,10 @@ services:
         image: haproxy
         ports:
             - '80:80'
+            - '22:22'
         volumes:
             - ./haproxy:/usr/local/etc/haproxy
+        restart: on-failure
 
     rabbitmq-server:
         container_name: rabbitmq-server
