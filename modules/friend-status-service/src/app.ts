@@ -1,6 +1,6 @@
 import express from "express";
 import http from "http";
-import "dotenv/config";
+import dotenv from "dotenv";
 import cors from "cors";
 
 const app = express();
@@ -9,8 +9,30 @@ const server = http.createServer(app);
 app.use(express.static("public"));
 app.use(cors());
 
+dotenv.config();
+
+interface IFriend {
+  username: String,
+  socketRoom: Number,
+  status: String
+};
+
+interface IUserAndFriendsList {
+  socketRoom: Number,
+  friendsList: IFriend[]
+};
+
+interface ServerToClientEvents {
+  friends_status: (friendsList: IFriend[]) => void,
+  update_user_status: (USER_SOCKET_ROOM: String, status: String) => void
+};
+
+interface ClientToServerEvents {
+  user_connected: (userAndFriendsList: IUserAndFriendsList) => void
+};
+
 import { Server } from "socket.io";
-const io = new Server(server, {
+const io = new Server<ClientToServerEvents, ServerToClientEvents> (server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"]
@@ -18,7 +40,7 @@ const io = new Server(server, {
 });
 
 
-function getFriendsStatusAndNotifyFriends(USER_SOCKET_ROOM, FRIENDS_LIST) {
+function getFriendsStatusAndNotifyFriends(USER_SOCKET_ROOM: String, FRIENDS_LIST: IFriend[]) {
   FRIENDS_LIST.forEach(friend => {
     // get friend's socket room
     const friendSocketRoom = 'user__' + friend.socketRoom;
@@ -42,8 +64,8 @@ function getFriendsStatusAndNotifyFriends(USER_SOCKET_ROOM, FRIENDS_LIST) {
 
 io.on("connection", (socket) => {
   // console.log('\n\n=========NEW CONNECTION==========')
-  let USER_SOCKET_ROOM = null;
-  let FRIENDS_LIST = null;
+  let USER_SOCKET_ROOM = '';
+  let FRIENDS_LIST: Array<IFriend> = [];
 
   socket.on("user_connected", (userAndFriendsList) => {
     USER_SOCKET_ROOM = 'user__' + userAndFriendsList.socketRoom;
@@ -60,7 +82,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    if (FRIENDS_LIST) {
+    if (FRIENDS_LIST.length) {
       FRIENDS_LIST.forEach(friend => {
         // get friend's socket room
         const friendSocketRoom = 'user__' + friend.socketRoom;
