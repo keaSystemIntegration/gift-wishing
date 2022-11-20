@@ -10,7 +10,6 @@ services:
     build: ./haproxy
     ports:
       - '80:80'
-      - '22:22'
     restart: on-failure
 
 
@@ -33,6 +32,8 @@ services:
         limits:
           cpus: "0.50"
           memory: "512M"
+    ports:
+      - "22:22"
     container_name: sftp-service
     build: ./modules/sftp-service
     volumes:
