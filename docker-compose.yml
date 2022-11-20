@@ -54,7 +54,7 @@ services:
             target: production
 
     auth-service:
-        image: auth-service
+        build: ./modules/auth-service
         environment:
             - APPID=4500
             - MONGO_USERNAME=${MONGO_USERNAME}
@@ -63,3 +63,4 @@ services:
             - JWT_SECRET=${JWT_SECRET}
 volumes:
     sftp-upload:
+    haproxy:
