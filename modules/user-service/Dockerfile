@@ -19,7 +19,7 @@ WORKDIR /usr/src/app
 
 COPY package*.json .
 
-RUN npm ci --only=producton
+RUN npm ci --only=production
 
 COPY --from=development /usr/src/app/build ./build
 COPY --from=development /usr/src/app/.env .

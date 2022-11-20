@@ -1,74 +1,65 @@
-version: "3"
+version: '3.4'
 services:
-
-    web1:
-      build: ./simple-route-app
-      container_name: web1
-      environment:
-        - PORT=8080
-      ports:
-          - "81:8080"
-
-    haproxy:
-      build: ./haproxy
-      container_name: haproxy
-      ports:
-        - "80:80"
+    lb:
+        image: haproxy
+        ports:
+            - '80:80'
+        volumes:
+            - ./haproxy:/usr/local/etc/haproxy
 
     rabbitmq-server:
-      container_name: rabbitmq-server
-      build: ./modules/rabbitmq-server
-      environment:
-        - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
-      ports:
-        - "5672:5672"
-        - "15672:15672"
+        container_name: rabbitmq-server
+        build: ./modules/rabbitmq-server
+        environment:
+            - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
+        # ports:
+        #     - '5672:5672'
+        #     - '15672:15672'
 
-    sftp-server:
-      container_name: sftp-server
-      build: ./modules/sftp-server
-      volumes:
-        - sftp-upload:/home/$SFTP_USER/upload
-      ports:
-        - "22:22"
-      environment:
-        - SFTP_USER=$SFTP_USER
-        - QUEUE_ENDPOINT=$QUEUE_ENDPOINT
-        - RABBITMQ_SERVER=$RABBITMQ_SERVER
-        - RABBITMQ_USER=$RABBITMQ_USER
-        - RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD
-#      command: $SFTP_USER:$SFTP_PASSWORD:1001
-      depends_on:
-        - rabbitmq-server
+    sftp-service:
+        container_name: sftp-service
+        build: ./modules/sftp-service
+        volumes:
+            - sftp-upload:/home/$SFTP_USER/upload
+        environment:
+            - SFTP_USER=$SFTP_USER
+            - QUEUE_ENDPOINT=$QUEUE_ENDPOINT
+            - RABBITMQ_SERVER=$RABBITMQ_SERVER
+            - RABBITMQ_USER=$RABBITMQ_USER
+            - RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD
+        #      command: $SFTP_USER:$SFTP_PASSWORD:1001
+        depends_on:
+            - rabbitmq-server
 
     products-service:
-      build: ./modules/products
-      container_name: products-service
-      environment:
-        - PORT=80
-        - DATABASE_URL=file:./../sqlite/products.db
-        - SFTP_URL=$SFTP_URL
-        - SFTP_USERNAME=$SFTP_USER
-        - SFTP_PASSWORD=$SFTP_PASSWORD
-        - RABBITMQ_SERVER=$RABBITMQ_SERVER
-        - RABBITMQ_USER=$RABBITMQ_USER
-        - RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD
-
-      ports:
-        - "85:8085"
-      restart: on-failure #find a better solution for timing the docker image
-      depends_on:
-        - sftp-server
-        - rabbitmq-server
+        build: ./modules/products-service
+        container_name: products-service
+        environment:
+            - PORT=8005
+            - DATABASE_URL=file:./../sqlite/products.db
+            - SFTP_URL=$SFTP_URL
+            - SFTP_USERNAME=$SFTP_USER
+            - SFTP_PASSWORD=$SFTP_PASSWORD
+            - RABBITMQ_SERVER=$RABBITMQ_SERVER
+            - RABBITMQ_USER=$RABBITMQ_USER
+            - RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD
+        restart: on-failure #find a better solution for timing the docker image
+        depends_on:
+            - sftp-service
+            - rabbitmq-server
 
     user-service:
-      build:
-        context: ./modules/user-service
-        target: production
+        build:
+            context: ./modules/user-service
+            target: production
 
-      ports:
-        - 3000:3000
+    auth-service:
+        image: auth-service
+        environment:
+            - APPID=4500
+            - MONGO_USERNAME=${MONGO_USERNAME}
+            - MONGO_PASSWORD=${MONGO_PASSWORD}
+            - MONGO_DATABASE=${MONGO_DATABASE}
+            - JWT_SECRET=${JWT_SECRET}
 volumes:
-  sftp-upload:
-
-
+    sftp-upload:
