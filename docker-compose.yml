@@ -37,7 +37,7 @@ services:
         - RABBITMQ_SERVER=$RABBITMQ_SERVER
         - RABBITMQ_USER=$RABBITMQ_USER
         - RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD
-      command: $SFTP_USER:$SFTP_PASSWORD:1001
+#      command: $SFTP_USER:$SFTP_PASSWORD:1001
       depends_on:
         - rabbitmq-server
 
@@ -45,7 +45,7 @@ services:
       build: ./modules/products
       container_name: products-service
       environment:
-        - PORT=8085
+        - PORT=80
         - DATABASE_URL=file:./../sqlite/products.db
         - SFTP_URL=$SFTP_URL
         - SFTP_USERNAME=$SFTP_USER
