@@ -61,6 +61,13 @@ services:
         - sftp-server
         - rabbitmq-server
 
+    user-service:
+      build:
+        context: ./modules/user-service
+        target: production
+
+      ports:
+        - 3000:3000
 volumes:
   sftp-upload:
 
