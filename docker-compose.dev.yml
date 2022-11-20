@@ -13,3 +13,25 @@ services:
     ports:
       - 3000:3000
     command: npm run dev
+  
+  # wishlist-service-development:
+  #   build:
+  #     context: ./modules/wishlist-service
+  #     target: development
+  #   volumes:
+  #     - ./modules/wishlist-service:/usr/src/app
+  #     - /usr/src/app/node_modules
+  #   ports:
+  #     - 8001:8001
+  #   command: node src/app.js
+
+  # friend-status-service-development:
+  #   build:
+  #     context: ./modules/friend-status-service
+  #     target: development
+  #   volumes:
+  #     - ./modules/friend-status-service:/usr/src/app
+  #     - /usr/src/app/node_modules
+  #   ports:
+  #     - 8002:8002
+  #   command: node src/app.js

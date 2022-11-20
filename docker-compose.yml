@@ -61,6 +61,19 @@ services:
             - MONGO_PASSWORD=${MONGO_PASSWORD}
             - MONGO_DATABASE=${MONGO_DATABASE}
             - JWT_SECRET=${JWT_SECRET}
+    # wishlist-service:
+    #     build:
+    #         context: ./modules/wishlist-service
+    #         target: production
+    #     ports:
+    #         - 8001:8001
+
+    # friend-status-service:
+    #     build:
+    #         context: ./modules/friend-status-service
+    #         target: production
+    #     ports:
+    #         - 8002:8002
 volumes:
     sftp-upload:
     haproxy:
