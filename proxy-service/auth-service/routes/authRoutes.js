@@ -17,42 +17,52 @@ router.post('/signup', async (req, res) => {
   console.log(JWT_SECRET);
 
   try {
-    const session = await mongoose.startSession();
-    session.withTransaction(async () => {
-      const authUser = new AuthUser({ email, password, username, name });
-      await authUser.save({ session });
+    // const session = await mongoose.startSession();
+    // session.withTransaction(async () => {
+    const authUser = new AuthUser({ email, password, username, name });
+    await authUser.save();
 
-      const user = {
+    const user = {
+      userId: authUser._id.toString(),
+      email: authUser.email,
+      name: authUser.name,
+      username: authUser.username
+    };
+
+    console.log(authUser.email);
+
+    // call user api to add new user
+    // I suppose the url would be like this: proxy.domain.com/user/create
+    // ("user" is a flag to be used by the proxy to know what service to point to)
+    // ("create" is an example of an endpoint inside the user service)
+
+    // does the user service need the uuid from the authuser here?
+    const res = axios
+      .post('https://localhost:8000/user-service/user', {
         userId: authUser._id.toString(),
-        email: authUser.email,
-        name: authUser.name,
-        username: authUser.username
-      };
+        email: user.email,
+        username: user.username,
+        name: authUser.name
+      })
+      .catch(async () => {
+        const result = await AuthUser.deleteOne({ email: authUser.email });
+        console.log(result);
+      });
 
-      // call user api to add new user
-      // I suppose the url would be like this: proxy.domain.com/user/create
-      // ("user" is a flag to be used by the proxy to know what service to point to)
-      // ("create" is an example of an endpoint inside the user service)
+    // AuthUser.findById(authUser._id).then((doc) => {
+    //   doc.remove();
+    // });
 
-      // does the user service need the uuid from the authuser here?
-      // const res = await axios.post('https://localhost:8000/user-service/user', {
-      //   id: authUser._id.toString(),
-      //   email: user.email,
-      //   username: user.username,
-      //   name: authUser.name
-      // });
+    // if (!res.data) {
+    // }
 
-      // if (!res.data) {
-      //   throw new Error("Couldn't add user to the user-service");
-      // }
+    const token = jwt.sign(user, JWT_SECRET);
 
-      const token = jwt.sign(user, JWT_SECRET);
+    console.log('Token:', token);
 
-      console.log('Token:', token);
-
-      res.send({ token, user });
-    });
-    session.endSession();
+    res.send({ token, user });
+    // });
+    // await session.endSession();
   } catch (e) {
     return res.status(422).send(e.message); // invalid data
   }
