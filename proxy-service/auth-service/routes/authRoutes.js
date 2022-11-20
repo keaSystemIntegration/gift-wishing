@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
 import * as dotenv from 'dotenv';
+import axios from 'axios';
 
 dotenv.config();
 
@@ -11,27 +12,47 @@ const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
 
 router.post('/signup', async (req, res) => {
-  const { email, password } = req.body;
+  const { email, name, username, password } = req.body;
 
   console.log(JWT_SECRET);
 
   try {
-    const authUser = new AuthUser({ email, password });
-    await authUser.save();
+    const session = await mongoose.startSession();
+    session.withTransaction(async () => {
+      const authUser = new AuthUser({ email, password, username, name });
+      await authUser.save({ session });
 
-    const token = jwt.sign(
-      { userId: authUser._id.toString(), email: authUser.email },
-      JWT_SECRET
-    );
+      const user = {
+        userId: authUser._id.toString(),
+        email: authUser.email,
+        name: authUser.name,
+        username: authUser.username
+      };
 
-    console.log('Token:', token);
+      // call user api to add new user
+      // I suppose the url would be like this: proxy.domain.com/user/create
+      // ("user" is a flag to be used by the proxy to know what service to point to)
+      // ("create" is an example of an endpoint inside the user service)
 
-    res.send({ token });
+      // does the user service need the uuid from the authuser here?
+      // const res = await axios.post('https://localhost:8000/user-service/user', {
+      //   id: authUser._id.toString(),
+      //   email: user.email,
+      //   username: user.username,
+      //   name: authUser.name
+      // });
 
-    // call user api to add new user
-    // I suppose the url would be like this: proxy.domain.com/user/create
-    // ("user" is a flag to be used by the proxy to know what service to point to)
-    // ("create" is an example of an endpoint inside the user service)
+      // if (!res.data) {
+      //   throw new Error("Couldn't add user to the user-service");
+      // }
+
+      const token = jwt.sign(user, JWT_SECRET);
+
+      console.log('Token:', token);
+
+      res.send({ token, user });
+    });
+    session.endSession();
   } catch (e) {
     return res.status(422).send(e.message); // invalid data
   }
@@ -48,13 +69,15 @@ router.post('/signin', async (req, res) => {
     return res.status(404).send({ error: 'Invalid password or email' });
   }
 
+  const user = { userId: authUser._id.toString(), email };
+
   try {
     await authUser.comparePassword(password);
-    const token = jwt.sign({ userId: authUser._id.toString(), email }, JWT_SECRET);
+    const token = jwt.sign(user, JWT_SECRET);
 
     console.log('Token:', token);
 
-    res.send({ token });
+    res.send({ token, user });
   } catch (e) {
     return res.status(401).send({ error: 'Invalid password or email' });
   }

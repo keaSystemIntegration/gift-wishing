@@ -8,6 +8,12 @@ const authUserSchema = new mongoose.Schema({
     unique: true,
     required: true
   },
+  name: {
+    type: String
+  },
+  username: {
+    type: String
+  },
   password: {
     type: String,
     required: true
