@@ -1,11 +1,11 @@
 import neo4j from "neo4j-driver";
 import "dotenv/config";
 
-const { NEO4J_URL, NEO4J_PASSWORD, NEO4J_USERNAME } = process.env;
+const { USER_SERVICE_NEO4J_URL, USER_SERVICE_NEO4J_PASSWORD, USER_SERVICE_NEO4J_USERNAME } = process.env;
 
 const neo4jDatabaseConnection = neo4j.driver(
-  NEO4J_URL!,
-  neo4j.auth.basic(NEO4J_USERNAME!, NEO4J_PASSWORD!),
+  USER_SERVICE_NEO4J_URL,
+  neo4j.auth.basic(USER_SERVICE_NEO4J_USERNAME, USER_SERVICE_NEO4J_PASSWORD),
   { disableLosslessIntegers: true } // take under consideration that the numbers will not be too big
 );
 

@@ -4,11 +4,10 @@ import { inviteRoutes } from './routes/invite-routes';
 import { relationshipRoutes } from './routes/relationship-routes';
 import { userRoutes } from './routes/user-routes';
 import { emailServerUrl } from './services/email-server-service';
-//import "dotenv/config";
 
 const app = express();
 
-const port = process.env.PORT;
+const port = process.env.USER_SERVICE_PORT;
 app.use(express.json());
 app.use("/user", userRoutes);
 app.use("/friend", friendRoutes);
