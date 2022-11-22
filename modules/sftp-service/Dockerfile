@@ -11,9 +11,11 @@ COPY ./publisher /publisher
 COPY ./users.conf /etc/sftp/users.conf
 # sftp config
 COPY ./sftp-config.sh /etc/sftp.d/sftp-config.sh
+RUN sed -i -e 's/\r$//' /etc/sftp.d/sftp-config.sh
 
 # file changes listeern script
 COPY ./publish-update.sh /etc/sftp.d/publish-update.sh
+RUN sed -i -e 's/\r$//' /etc/sftp.d/publish-update.sh
 RUN ["chmod", "+x", "/etc/sftp.d/publish-update.sh"]
 EXPOSE 22
 ENTRYPOINT ["/entrypoint"]
