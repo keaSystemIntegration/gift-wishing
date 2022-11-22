@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import "dotenv/config";
 import InviteToken from '../models/InviteToken';
 
-const secret = process.env.JWT_SECRET;
+const secret = process.env.USER_SERVICE_JWT_SECRET;
 
 export const createToken = (object: InviteToken) => {
 	const token = jwt.sign(object, secret);

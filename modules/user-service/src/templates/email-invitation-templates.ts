@@ -2,7 +2,7 @@ import Email from "../models/Email";
 import User from "../models/User";
 import { isEmail } from "../validation/input-validation";
 
-const signupUrl = process.env.SIGNUP_URL;
+const signupUrl = process.env.USER_SERVICE_SIGNUP_URL;
 
 export const invitationEmail = (inviteFromUser: User, friendEmail: string, token: string): Email => {
 	if(!isEmail(friendEmail)){

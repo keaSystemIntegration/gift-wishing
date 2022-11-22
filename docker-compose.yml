@@ -53,6 +53,20 @@ services:
         build:
             context: ./modules/user-service
             target: production
+        environment:
+            - NODE_ENV=production
+            - USER_SERVICE_PORT=${USER_SERVICE_PORT}
+            - USER_SERVICE_NEO4J_URL=${USER_SERVICE_NEO4J_URL}
+            - USER_SERVICE_NEO4J_USERNAME=${USER_SERVICE_NEO4J_USERNAME}
+            - USER_SERVICE_NEO4J_PASSWORD=${USER_SERVICE_NEO4J_PASSWORD}
+            - USER_SERVICE_AURA_INSTANCENAME=${USER_SERVICE_AURA_INSTANCENAME}
+            - USER_SERVICE_JWT_SECRET=${USER_SERVICE_JWT_SECRET}
+            - USER_SERVICE_SIGNUP_URL=${USER_SERVICE_SIGNUP_URL}
+            - EMAIL_SERVER_URL_LOCAL=${EMAIL_SERVER_URL_LOCAL}
+            - EMAIL_SERVER_URL_PROD=${EMAIL_SERVER_URL_PROD}
+            - EMAIL_SERVER_ACCESS_TOKEN=${EMAIL_SERVER_ACCESS_TOKEN}
+            - EMAIL_SERVER_SENDER_EMAIL=${EMAIL_SERVER_SENDER_EMAIL}
+            - EMAIL_SERVER_SENDER_PASSWORD=${EMAIL_SERVER_SENDER_PASSWORD}
 
     auth-service:
         build: ./modules/auth-service
