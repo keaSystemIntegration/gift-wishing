@@ -10,7 +10,7 @@ To do so, create a .env file on the root directory. The file should be fill out 
 ```
 STORAGE_VOLUME_USER=
 STORAGE_VOLUME_PASSWORD=
-SFTP_PASSWORD=
+SFTP_SERVICE_PASSWORD=
 SFTP_USER=
 SFTP_URL=
 QUEUE_ENDPOINT=
@@ -24,7 +24,7 @@ MONGO_DATABASE=
 JWT_SECRET=
 ```
 
-In addition, you will need to create a separate env in root/modules/user-service
+In addition, you will need to create a separate .env file in root/modules/user-service
 The content of this env file should be as following
 
 ```
@@ -52,6 +52,12 @@ After you set up the env, locate your terminal in the root directory and execute
 ```
 docker compose up
 ```
+
+## Online Version
+
+This app can be found online at _________. 
+This version is host on azure. 
+
 
 # Products
 
