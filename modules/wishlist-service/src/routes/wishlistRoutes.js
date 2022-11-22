@@ -33,29 +33,24 @@ router.get('/', async (req, res) => {
 });
 
 // get user's wishlist
-router.get('/:id', getWishlist, (req, res) => {
-  try {
-    res.json(res.wishlist);
-  } catch (error) {
-    // means the database has an error and it has nothing to do with the client using the API
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// wishlist is created simultaneously when new user is created
-router.post('/', async (req, res) => {
-  const wishlist = new Wishlist({
-    userId: req.body.userId,
-    products: req.body.products
-  });
+router.get('/:id', async(req, res) => {
+  // console.log(req.params.id);
 
   try {
-    const newWishlist = await wishlist.save();
-    // 201: successfully created
-    res.status(201).json(newWishlist);
+    const wishlist = await Wishlist.find({ userId: req.params.id });
+    // console.log(wishlist)
+    // create a new wishlist for new users
+    if (wishlist.length === 0) {
+      const newWishlist = new Wishlist({
+        userId: req.params.id
+      });
+      await newWishlist.save();
+      return res.status(201).json({message: "Successfully created", wishlist: newWishlist} )
+    } else {
+      return res.status(201).json( wishlist );
+    }
   } catch (error) {
-    // 400: user wrong input
-    res.status(400).json({ message: error.message })
+    return res.status(500).json({ message: error.message });
   }
 });
 

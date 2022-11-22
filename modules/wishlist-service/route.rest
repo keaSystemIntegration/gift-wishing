@@ -9,21 +9,8 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:8001/post-ID-example3
+GET http://localhost:8001/post-ID-example4
 
-###
-POST http://localhost:8001/
-Content-Type: application/json
-
-{
-  "userId": "post-ID-example4",
-  "products": [
-    {
-      "name": "post-name-example3",
-      "url": "post-url-example3"
-    }
-  ]
-}
 
 ###
 PATCH http://localhost:8001/post-ID-example4
