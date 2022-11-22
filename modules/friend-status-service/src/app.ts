@@ -6,7 +6,7 @@ import cors from "cors";
 const app = express();
 const server = http.createServer(app);
 
-app.use(express.static("public"));
+// app.use(express.static("public"));
 app.use(cors());
 
 dotenv.config();
@@ -99,6 +99,10 @@ io.on("connection", (socket) => {
     }
   });
 })
+
+app.get('/', (req, res) => {
+  res.send("Friend Status Service");
+});
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {
