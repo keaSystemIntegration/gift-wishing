@@ -1,54 +1,103 @@
-version: '3'
+version: '3.4'
 services:
-    rabbitmq-server:
-        image: giftwishingacr.azurecr.io/rabbitmq-server
-        container_name: rabbitmq-server
-        build: ./modules/rabbitmq-server
-        environment:
-            - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
+  lb:
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: "512M"
+    image: giftwishingwe.azurecr.io/haproxy
+    build: ./haproxy
+    ports:
+      - '80:80'
+    restart: on-failure
 
-    sftp-service:
-        image: giftwishingacr.azurecr.io/sftp-service
-        container_name: sftp-service
-        build: ./modules/sftp-service
-        volumes:
-            - sftp-upload:/home/$SFTP_USER/upload
-        environment:
-            - SFTP_USER=$SFTP_USER
-            - QUEUE_ENDPOINT=$QUEUE_ENDPOINT
-            - RABBITMQ_SERVER=$RABBITMQ_SERVER
-            - RABBITMQ_USER=$RABBITMQ_USER
-            - RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD
-        ports:
-            - '22:22'
-        depends_on:
-            - rabbitmq-server
 
-    products-service:
-        image: giftwishingacr.azurecr.io/products-service
-        build: ./modules/products-service
-        container_name: products-service
-        ports:
-            - '80:80'
-        environment:
-            - PORT=80
-            - DATABASE_URL=file:./../sqlite/products.db
-            - SFTP_URL=$SFTP_URL
-            - SFTP_USERNAME=$SFTP_USER
-            - SFTP_PASSWORD=$SFTP_PASSWORD
-            - RABBITMQ_SERVER=$RABBITMQ_SERVER
-            - RABBITMQ_USER=$RABBITMQ_USER
-            - RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD
+  rabbitmq-server:
+      image: giftwishingwe.azurecr.io/rabbitmq-server
+      container_name: rabbitmq-server
+      deploy:
+        resources:
+          limits:
+            cpus: "0.50"
+            memory: "512M"
+      build: ./modules/rabbitmq-server
+      environment:
+        - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
 
-        restart: on-failure #TODO: find a better solution for timing the docker image
-        depends_on:
-            - sftp-server
-            - rabbitmq-server
+  sftp-service:
+    image: giftwishingwe.azurecr.io/sftp-service
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: "512M"
+    ports:
+      - "22:22"
+    container_name: sftp-service
+    build: ./modules/sftp-service
+    volumes:
+        - sftp-upload:/home/$SFTP_USER/upload
+    environment:
+      - SFTP_USER=$SFTP_USER
+      - QUEUE_ENDPOINT=$QUEUE_ENDPOINT
+      - RABBITMQ_SERVER=$RABBITMQ_SERVER
+      - RABBITMQ_USER=$RABBITMQ_USER
+      - RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD
+    depends_on:
+      - rabbitmq-server
 
-    user-service:
-        build:
-            context: ./modules/user-service
-            target: production
+  products-service:
+    image: giftwishingwe.azurecr.io/products-service
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: "512M"
+    build: ./modules/products-service
+    container_name: products-service
+    ports:
+      - "8005:8005"
+    environment:
+      - PORT=8005
+      - DATABASE_URL=file:./../sqlite/products.db
+      - SFTP_URL=$SFTP_URL
+      - SFTP_USERNAME=$SFTP_USER
+      - SFTP_PASSWORD=$SFTP_PASSWORD
+      - RABBITMQ_SERVER=$RABBITMQ_SERVER
+      - RABBITMQ_USER=$RABBITMQ_USER
+      - RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD
+    restart: on-failure #TODO: find a better solution for timing the docker image
+    depends_on:
+      - sftp-service
+      - rabbitmq-server
+
+  user-service:
+    image: giftwishingwe.azurecr.io/user-service
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: "512M"
+    build:
+      context: ./modules/user-service
+      target: production
+
+  auth-service:
+    image: giftwishingwe.azurecr.io/auth-service
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: "512M"
+    build: ./modules/auth-service
+    environment:
+      - APPID=4500
+      - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_DATABASE=${MONGO_DATABASE}
+      - JWT_SECRET=${JWT_SECRET}
+
 
 volumes:
     sftp-upload:
@@ -57,7 +106,7 @@ volumes:
             share_name: sftp-upload
             #      accountname: $STORAGE_VOLUME_USER
             #      accountkey: $STORAGE_VOLUME_PASSWORD
-            storage_account_name: giftwishingstorage
+            storage_account_name: giftwishingstoragewe
             remotepath: home
 #  rabbitmq-data:
 #    driver: azure_file

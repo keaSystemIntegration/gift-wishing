@@ -1,7 +1,7 @@
 version: '3.4'
 services:
     lb:
-        image: haproxy
+        build: ./haproxy
         ports:
             - '80:80'
             - '22:22'
@@ -29,7 +29,6 @@ services:
             - RABBITMQ_SERVER=$RABBITMQ_SERVER
             - RABBITMQ_USER=$RABBITMQ_USER
             - RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD
-        #      command: $SFTP_USER:$SFTP_PASSWORD:1001
         depends_on:
             - rabbitmq-server
 
@@ -79,3 +78,4 @@ services:
 volumes:
     sftp-upload:
     haproxy:
+
