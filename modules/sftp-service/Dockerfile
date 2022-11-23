@@ -8,10 +8,12 @@ RUN pip install pika
 # python script
 
 COPY ./publisher /publisher
-COPY ./users.conf /etc/sftp/users.conf
 # sftp config
 COPY ./sftp-config.sh /etc/sftp.d/sftp-config.sh
-
+ARG SFTP_SERVICE_USERNAME
+ARG SFTP_SERVICE_PASSWORD
+RUN mkdir -p /etc/sftp
+RUN echo "$SFTP_SERVICE_USERNAME:$SFTP_SERVICE_PASSWORD:1001" > /etc/sftp/users.conf
 # file changes listeern script
 COPY ./publish-update.sh /etc/sftp.d/publish-update.sh
 RUN ["chmod", "+x", "/etc/sftp.d/publish-update.sh"]

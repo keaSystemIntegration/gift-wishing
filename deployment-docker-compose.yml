@@ -35,15 +35,19 @@ services:
     ports:
       - "22:22"
     container_name: sftp-service
-    build: ./modules/sftp-service
+    build:
+      context: ./modules/sftp-service
+      dockerfile: ./Dockerfile
+      args:
+        - SFTP_SERVICE_USERNAME=$SFTP_SERVICE_USERNAME
+        - SFTP_SERVICE_PASSWORD=$SFTP_SERVICE_PASSWORD
     volumes:
-        - sftp-upload:/home/$SFTP_USER/upload
+      - sftp-upload:/home/$SFTP_SERVICE_USERNAME/upload
     environment:
-      - SFTP_USER=$SFTP_USER
-      - QUEUE_ENDPOINT=$QUEUE_ENDPOINT
-      - RABBITMQ_SERVER=$RABBITMQ_SERVER
-      - RABBITMQ_USER=$RABBITMQ_USER
-      - RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD
+      - SFTP_SERVICE_USERNAME=$SFTP_SERVICE_USERNAME
+      - RABBITMQ_SERVICE_HOST=$RABBITMQ_SERVICE_HOST
+      - RABBITMQ_SERVICE_USER=$RABBITMQ_SERVICE_USER
+      - RABBITMQ_SERVICE_PASSWORD=$RABBITMQ_SERVICE_PASSWORD
     depends_on:
       - rabbitmq-server
 
@@ -61,12 +65,12 @@ services:
     environment:
       - PORT=8005
       - DATABASE_URL=file:./../sqlite/products.db
-      - SFTP_URL=$SFTP_URL
-      - SFTP_USERNAME=$SFTP_USER
-      - SFTP_PASSWORD=$SFTP_PASSWORD
-      - RABBITMQ_SERVER=$RABBITMQ_SERVER
-      - RABBITMQ_USER=$RABBITMQ_USER
-      - RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD
+      - SFTP_SERVICE_URL=$SFTP_SERVICE_URL
+      - SFTP_SERVICE_USERNAME=$SFTP_SERVICE_USERNAME
+      - SFTP_SERVICE_PASSWORD=$SFTP_SERVICE_PASSWORD
+      - RABBITMQ_SERVICE_HOST=$RABBITMQ_SERVICE_HOST
+      - RABBITMQ_SERVICE_USER=$RABBITMQ_SERVICE_USER
+      - RABBITMQ_SERVICE_PASSWORD=$RABBITMQ_SERVICE_PASSWORD
     restart: on-failure #TODO: find a better solution for timing the docker image
     depends_on:
       - sftp-service
@@ -118,14 +122,5 @@ volumes:
         driver: azure_file
         driver_opts:
             share_name: sftp-upload
-            #      accountname: $STORAGE_VOLUME_USER
-            #      accountkey: $STORAGE_VOLUME_PASSWORD
             storage_account_name: giftwishingstoragewe
             remotepath: home
-#  rabbitmq-data:
-#    driver: azure_file
-#    driver_opts:
-#      share_name: rabbitmq-data
-#      storage_account_name: giftwishingstorage
-
-#Error: Failed to start container sftp-server, Error response: to create containerd task: failed to create shim task: failed to create container 13469c8568487a853ee9573d9c3d41f23cd813a336d38e9a38e2648b00059109: guest RPC failure: failed to create container: failed to run runc create/exec call for container 13469c8568487a853ee9573d9c3d41f23cd813a336d38e9a38e2648b00059109 with exit status 1: container_linux.go:380: starting container process caused: exec: "foo:pass:1001": executable file not found in $PATH: unknown

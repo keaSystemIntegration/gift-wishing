@@ -3,18 +3,12 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
-const { SFTP_URL, SFTP_USERNAME, SFTP_PASSWORD } = process.env
-
-console.log(
-    ' SFTP_URL, SFTP_USERNAME, SFTP_PASSWORD>',
-    SFTP_URL,
-    SFTP_USERNAME,
-    SFTP_PASSWORD
-)
+const { SFTP_SERVICE_URL, SFTP_SERVICE_USERNAME, SFTP_SERVICE_PASSWORD } =
+    process.env
 
 export const sftpConnection: ConnectOptions = {
-    host: SFTP_URL,
+    host: SFTP_SERVICE_URL,
     port: 22,
-    username: SFTP_USERNAME,
-    password: SFTP_PASSWORD,
+    username: SFTP_SERVICE_USERNAME,
+    password: SFTP_SERVICE_PASSWORD,
 }

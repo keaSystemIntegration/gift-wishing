@@ -1,8 +1,8 @@
 import pika
 import os
-credentials = pika.PlainCredentials(os.environ["RABBITMQ_USER"], os.environ["RABBITMQ_PASSWORD"])
+credentials = pika.PlainCredentials(os.environ["RABBITMQ_SERVICE_USER"], os.environ["RABBITMQ_SERVICE_PASSWORD"])
 connection = pika.BlockingConnection(
-    pika.ConnectionParameters(host=os.environ["RABBITMQ_SERVER"],credentials=credentials ))
+    pika.ConnectionParameters(host=os.environ["RABBITMQ_SERVICE_HOST"],credentials=credentials ))
 channel = connection.channel()
 
 channel.exchange_declare(exchange='update-db', exchange_type='fanout')

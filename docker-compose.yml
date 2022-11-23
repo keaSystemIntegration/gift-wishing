@@ -20,15 +20,19 @@ services:
 
     sftp-service:
         container_name: sftp-service
-        build: ./modules/sftp-service
+        build:
+          context: ./modules/sftp-service
+          dockerfile: ./Dockerfile
+          args:
+            - SFTP_SERVICE_USERNAME=$SFTP_SERVICE_USERNAME
+            - SFTP_SERVICE_PASSWORD=$SFTP_SERVICE_PASSWORD
         volumes:
-            - sftp-upload:/home/$SFTP_USER/upload
+            - sftp-upload:/home/$SFTP_SERVICE_USERNAME/upload
         environment:
-            - SFTP_USER=$SFTP_USER
-            - QUEUE_ENDPOINT=$QUEUE_ENDPOINT
-            - RABBITMQ_SERVER=$RABBITMQ_SERVER
-            - RABBITMQ_USER=$RABBITMQ_USER
-            - RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD
+          - SFTP_SERVICE_USERNAME=$SFTP_SERVICE_USERNAME
+          - RABBITMQ_SERVICE_HOST=$RABBITMQ_SERVICE_HOST
+          - RABBITMQ_SERVICE_USER=$RABBITMQ_SERVICE_USER
+          - RABBITMQ_SERVICE_PASSWORD=$RABBITMQ_SERVICE_PASSWORD
         depends_on:
             - rabbitmq-server
 
@@ -36,14 +40,14 @@ services:
         build: ./modules/products-service
         container_name: products-service
         environment:
-            - PORT=8005
-            - DATABASE_URL=file:./../sqlite/products.db
-            - SFTP_URL=$SFTP_URL
-            - SFTP_USERNAME=$SFTP_USER
-            - SFTP_PASSWORD=$SFTP_PASSWORD
-            - RABBITMQ_SERVER=$RABBITMQ_SERVER
-            - RABBITMQ_USER=$RABBITMQ_USER
-            - RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD
+            - PORT=$PRODUCTS_SERVICE_POST
+            - DATABASE_URL=$PRODUCTS_SERVICE_URL
+            - SFTP_SERVICE_URL=$SFTP_SERVICE_URL
+            - SFTP_SERVICE_USERNAME=$SFTP_SERVICE_USERNAME
+            - SFTP_SERVICE_PASSWORD=$SFTP_SERVICE_PASSWORD
+            - RABBITMQ_SERVICE_HOST=$RABBITMQ_SERVICE_HOST
+            - RABBITMQ_SERVICE_USER=$RABBITMQ_SERVICE_USER
+            - RABBITMQ_SERVICE_PASSWORD=$RABBITMQ_SERVICE_PASSWORD
         restart: on-failure #find a better solution for timing the docker image
         depends_on:
             - sftp-service
