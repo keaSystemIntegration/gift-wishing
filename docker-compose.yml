@@ -82,19 +82,16 @@ services:
             context: ./modules/wishlist-service
             target: production
         environment:
-            - PORT=${WISHLIST_PORT}
-            - MONGO_URL=${WISHLIST_MONGO_URL}
-        ports:
-            - 8001:8001
+            - WISHLIST_SERVICE_PORT=${WISHLIST_SERVICE_PORT}
+            - WISHLIST_CONNECTION_URL=${WISHLIST_CONNECTION_URL}
+       
 
     friend-status-service:
         build:
             context: ./modules/friend-status-service
             target: production
         environment:
-            - PORT=8002
-        ports:
-            - 8002:8002
+            - FRIEND_STATUS_SERVICE_PORT=${FRIEND_STATUS_SERVICE_PORT}
 volumes:
     sftp-upload:
     haproxy:
