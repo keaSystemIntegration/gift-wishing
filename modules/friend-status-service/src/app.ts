@@ -2,6 +2,7 @@ import express from "express";
 import http from "http";
 import dotenv from "dotenv";
 import cors from "cors";
+import { Server, Socket } from "socket.io";
 
 const app = express();
 const server = http.createServer(app);
@@ -18,7 +19,7 @@ interface IFriend {
 };
 
 interface IUserAndFriendsList {
-  socketRoom: Number,
+  socketRoom: String,
   friendsList: IFriend[]
 };
 
@@ -31,7 +32,6 @@ interface ClientToServerEvents {
   user_connected: (userAndFriendsList: IUserAndFriendsList) => void
 };
 
-import { Server } from "socket.io";
 const io = new Server<ClientToServerEvents, ServerToClientEvents> (server, {
   cors: {
     origin: "*",
@@ -41,28 +41,32 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents> (server, {
 
 
 function getFriendsStatusAndNotifyFriends(USER_SOCKET_ROOM: String, FRIENDS_LIST: IFriend[]) {
-  FRIENDS_LIST.forEach(friend => {
-    // get friend's socket room
-    const friendSocketRoom = 'user__' + friend.socketRoom;
-
-    // if the friend's room exists it means the friend is online
-    const friendRoom = io.sockets.adapter.rooms.get(friendSocketRoom);
-    if (friend.username == null) {
-      friend.status = 'not registered';
-    } else if (friendRoom) {
-      // emit to friend that user is on
-      io.to(friendSocketRoom).emit("update_user_status", USER_SOCKET_ROOM, 'on');
-
-      // set friend status for the user
-      friend.status = 'on';
-    } else {
-      friend.status = 'off';
-    }
-  });
-  return FRIENDS_LIST;
+  if ( FRIENDS_LIST.length ) {
+    FRIENDS_LIST.forEach(friend => {
+      // get friend's socket room
+      const friendSocketRoom = 'user__' + friend.socketRoom;
+  
+      // if the friend's room exists it means the friend is online
+      const friendRoom = io.sockets.adapter.rooms.get(friendSocketRoom);
+      if (friend.username == null) {
+        friend.status = 'not registered';
+      } else if (friendRoom) {
+        // emit to friend that user is on
+        io.to(friendSocketRoom).emit("update_user_status", USER_SOCKET_ROOM, 'on');
+  
+        // set friend status for the user
+        friend.status = 'on';
+      } else {
+        friend.status = 'off';
+      }
+    });
+    return FRIENDS_LIST;
+  } else {
+    return [];
+  }
 }
 
-io.on("connection", (socket) => {
+io.on("connection", (socket: Socket) => {
   // console.log('\n\n=========NEW CONNECTION==========')
   let USER_SOCKET_ROOM = '';
   let FRIENDS_LIST: Array<IFriend> = [];
@@ -100,11 +104,12 @@ io.on("connection", (socket) => {
   });
 })
 
+// Development purposes
 app.get('/', (req, res) => {
-  res.send("Friend Status Service");
+  res.json({"message":"Friend Status Service"});
 });
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.FRIEND_STATUS_SERVICE_PORT || 8080;
 server.listen(PORT, () => {
   console.log(`Server is running on port: http://localhost:${PORT}`);
 })
