@@ -17,5 +17,6 @@ RUN echo "$SFTP_SERVICE_USERNAME:$SFTP_SERVICE_PASSWORD:1001" > /etc/sftp/users.
 # file changes listeern script
 COPY ./publish-update.sh /etc/sftp.d/publish-update.sh
 RUN ["chmod", "+x", "/etc/sftp.d/publish-update.sh"]
+RUN ["chmod", "+x", "/etc/sftp.d/sftp-config.sh"]
 EXPOSE 22
 ENTRYPOINT ["/entrypoint"]

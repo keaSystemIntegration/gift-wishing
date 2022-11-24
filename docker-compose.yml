@@ -35,6 +35,8 @@ services:
           - RABBITMQ_SERVICE_PASSWORD=$RABBITMQ_SERVICE_PASSWORD
         depends_on:
             - rabbitmq-server
+#        ports:
+#          - "22:22"
 
     products-service:
         build: ./modules/products-service
