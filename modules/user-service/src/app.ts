@@ -1,6 +1,7 @@
 import express from 'express';
 import { friendRoutes } from './routes/friend-routes';
 import { inviteRoutes } from './routes/invite-routes';
+import { profilePictureRoutes } from './routes/profile-picture-routes';
 import { relationshipRoutes } from './routes/relationship-routes';
 import { userRoutes } from './routes/user-routes';
 import { emailServerUrl } from './services/email-server-service';
@@ -13,6 +14,7 @@ app.use("/user", userRoutes);
 app.use("/friend", friendRoutes);
 app.use("/invite", inviteRoutes);
 app.use("/relationship", relationshipRoutes);
+app.use("/profile-picture", profilePictureRoutes);
 
 
 app.get('/', (req, res) => {
