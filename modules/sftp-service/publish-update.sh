@@ -4,4 +4,4 @@ while inotifywait -e close_write /home/"$SFTP_SERVICE_USERNAME"/upload/products.
 do
   python3 /publisher/send.py ;
   echo "db got updated"
-  done &
+done &
