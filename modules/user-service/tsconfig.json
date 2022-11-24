@@ -12,7 +12,7 @@
     "outDir": "./build",                                   /* Specify an output folder for all emitted files. */
     "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS models. This enables `allowSyntheticDefaultImports` for type compatibility. */
     "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
-    "noImplicitAny": true,                               /* Enable error reporting for expressions and declarations with an implied `any` type.. */
+    "noImplicitAny": false,                               /* Enable error reporting for expressions and declarations with an implied `any` type.. */
     "skipLibCheck": true,                                 /* Skip type checking all .d.ts files. */
   },
   "include": ["src/**/*"]
