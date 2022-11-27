@@ -7,25 +7,25 @@ import { Server, Socket } from "socket.io";
 const app = express();
 const server = http.createServer(app);
 
-// app.use(express.static("public"));
+app.use(express.static("public"));
 app.use(cors());
 
 dotenv.config();
 
 interface IFriend {
-  username: String,
-  socketRoom: Number,
-  status: String
+  username: string,
+  userId: string,
+  status: string
 };
 
 interface IUserAndFriendsList {
-  socketRoom: String,
+  userId: string,
   friendsList: IFriend[]
 };
 
 interface ServerToClientEvents {
   friends_status: (friendsList: IFriend[]) => void,
-  update_user_status: (USER_SOCKET_ROOM: String, status: String) => void
+  update_user_status: (USER_SOCKET_ROOM: string, status: String) => void
 };
 
 interface ClientToServerEvents {
@@ -40,20 +40,20 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents> (server, {
 });
 
 
-function getFriendsStatusAndNotifyFriends(USER_SOCKET_ROOM: String, FRIENDS_LIST: IFriend[]) {
+function getFriendsStatusAndNotifyFriends(USER_SOCKET_ROOM: string, FRIENDS_LIST: IFriend[]) {
   if ( FRIENDS_LIST.length ) {
     FRIENDS_LIST.forEach(friend => {
       // get friend's socket room
-      const friendSocketRoom = 'user__' + friend.socketRoom;
+      const friendSocketRoom = friend.userId;
   
-      // if the friend's room exists it means the friend is online
-      const friendRoom = io.sockets.adapter.rooms.get(friendSocketRoom);
+      // console.log(io.sockets.adapter.rooms.get(friendSocketRoom))
       if (friend.username == null) {
         friend.status = 'not registered';
-      } else if (friendRoom) {
+      } else
+      // if the friend's room exists it means the friend is online
+      if (io.sockets.adapter.rooms.get(friendSocketRoom)) {
         // emit to friend that user is on
         io.to(friendSocketRoom).emit("update_user_status", USER_SOCKET_ROOM, 'on');
-  
         // set friend status for the user
         friend.status = 'on';
       } else {
@@ -71,13 +71,14 @@ io.on("connection", (socket: Socket) => {
   let USER_SOCKET_ROOM = '';
   let FRIENDS_LIST: Array<IFriend> = [];
 
-  socket.on("user_connected", (userAndFriendsList) => {
-    USER_SOCKET_ROOM = 'user__' + userAndFriendsList.socketRoom;
+  socket.on("user_connected", (userAndFriendsList: IUserAndFriendsList) => {
+    USER_SOCKET_ROOM = userAndFriendsList.userId;
     FRIENDS_LIST = userAndFriendsList.friendsList;
 
     //the user creates an unique room number based on UUID sent from database which
     // is joined by each separate connection of the same user
     socket.join(USER_SOCKET_ROOM)
+    // console.log('rooms', io.sockets.adapter.rooms)
 
     // get list of friends with statuses and notify active friends that the user is online
     const friendsList = getFriendsStatusAndNotifyFriends(USER_SOCKET_ROOM, FRIENDS_LIST);
@@ -89,7 +90,7 @@ io.on("connection", (socket: Socket) => {
     if (FRIENDS_LIST.length) {
       FRIENDS_LIST.forEach(friend => {
         // get friend's socket room
-        const friendSocketRoom = 'user__' + friend.socketRoom;
+        const friendSocketRoom = friend.userId;
       
         // notify only the active friends
         if (io.sockets.adapter.rooms.get(friendSocketRoom)) {
@@ -111,6 +112,6 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.FRIEND_STATUS_SERVICE_PORT || 8080;
 server.listen(PORT, () => {
-  console.log(`Server is running on port: http://localhost:${PORT}`);
+  console.log(`FRIEND STATUS server is running on: http://localhost:${PORT}`);
 })
 
