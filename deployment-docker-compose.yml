@@ -12,6 +12,13 @@ services:
       - '80:80'
     restart: on-failure
 
+  redis-service:
+    container_name: redis-server
+    image: giftwishingwe.azurecr.io/redis-server
+    build:
+      context: ./modules/redis-service
+      dockerfile: Dockerfile
+    restart: on-failure
 
   rabbitmq-server:
       image: giftwishingwe.azurecr.io/rabbitmq-server
@@ -64,13 +71,15 @@ services:
       - "8005:8005"
     environment:
       - PORT=8005
-      - DATABASE_URL=file:./../sqlite/products.db
+      - PRODUCTS_SERVICE_DATABASE_URL=$PRODUCTS_SERVICE_DATABASE_URL
       - SFTP_SERVICE_URL=$SFTP_SERVICE_URL
       - SFTP_SERVICE_USERNAME=$SFTP_SERVICE_USERNAME
       - SFTP_SERVICE_PASSWORD=$SFTP_SERVICE_PASSWORD
       - RABBITMQ_SERVICE_HOST=$RABBITMQ_SERVICE_HOST
       - RABBITMQ_SERVICE_USER=$RABBITMQ_SERVICE_USER
       - RABBITMQ_SERVICE_PASSWORD=$RABBITMQ_SERVICE_PASSWORD
+      - PRODUCTS_SERVICE_REDIS_URL=$PRODUCTS_SERVICE_REDIS_URL
+
     restart: on-failure #TODO: find a better solution for timing the docker image
     depends_on:
       - sftp-service
