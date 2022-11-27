@@ -48,6 +48,7 @@ EMAIL_SERVER_ACCESS_TOKEN=
 EMAIL_SERVER_SENDER_EMAIL=
 EMAIL_SERVER_SENDER_PASSWORD=
 ```
+
 To get the official env please contact us.
 
 
@@ -62,9 +63,7 @@ docker compose up
 This app can be found online at _________. 
 This version is host on azure. 
 
-
 # Products
-
 The products service is a service that expose for the user a graphql endpoint where it can fetch a list of products 
 or a single product by id. 
 After initialising the app the documentation for the graphql server can be found in http://{endpoint}/products/graphql
@@ -94,3 +93,8 @@ It can be accessed with any sftp client (fx: [Cyberduck](https://cyberduck.io/),
 After accessing the server you can view or replace the products.db. Please note that you should follow the schema as 
 described at the products section, or communicate with the development team if needed.
 
+
+![products vs sftp relation](../overview_of_the_system/products-sftp-diagram.png)
+
+# Nice Logo path
+The service is providing a logo which is hosted on azure cdn you can get the url for accessing the cdn through the development team
