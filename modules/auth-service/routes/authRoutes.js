@@ -9,7 +9,7 @@ dotenv.config();
 const AuthUser = mongoose.model('AuthUser');
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.AUTH_SERVICE_JWT_SECRET;
 
 router.post('/signup', async (req, res) => {
   const { email, name, username, password, inviteToken } = req.body;
