@@ -1,3 +1,6 @@
+FROM haproxy:2.3
+COPY . /usr/local/etc/haproxy/
+
 FROM haproxytech/haproxy-ubuntu:2.6
 WORKDIR /usr/src
 COPY . .
