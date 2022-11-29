@@ -27,49 +27,38 @@ router.post('/signup', async (req, res) => {
 
     console.log(authUser.email);
 
+    const token = jwt.sign(user, JWT_SECRET);
+    console.log('Token:', token);
+
     // integration team can perform sign up and friend invitation acceptance in the same way
     // invitation requires a token to be sent
-    if (inviteToken) {
-      axios
-        .post('http://proxy/user/invite/accept', {
+    try {
+      if (inviteToken) {
+        const response = axios.post('http://proxy/user/invite/accept', {
           token: inviteToken,
           email: user.email,
           username: user.username,
           name: authUser.name
-        })
-        .then((response) => {
-          console.log(response.data);
-        })
-        .catch(async (error) => {
-          console.log(error);
-          const result = await AuthUser.deleteOne({ email: authUser.email });
-          console.log(result);
-          return res.status(500).send('Error in the User Service');
         });
-    } else {
-      axios
-        .post('http://proxy/user/user', {
+
+        console.log((await response).data);
+        return res.status(200).send({ token, user });
+      } else {
+        axios.post('http://proxy/user/user', {
           userId: authUser._id.toString(),
           email: user.email,
           username: user.username,
           name: authUser.name
-        })
-        .then((response) => {
-          console.log(response.data);
-        })
-        .catch(async (error) => {
-          console.log(error);
-          const result = await AuthUser.deleteOne({ email: authUser.email });
-          console.log(result);
-          return res.status(500).send('Error in the User Service');
         });
+
+        console.log((await response).data);
+        return res.status(200).send({ token, user });
+      }
+    } catch (error) {
+      const result = await AuthUser.deleteOne({ email: authUser.email });
+      console.log(result);
+      res.status(500).send('Error in the User Service', error);
     }
-
-    const token = jwt.sign(user, JWT_SECRET);
-
-    console.log('Token:', token);
-
-    res.status(200).send({ token, user });
   } catch (e) {
     return res.status(422).send(e.message); // invalid data
   }
