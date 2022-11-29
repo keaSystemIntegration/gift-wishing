@@ -71,6 +71,8 @@ router.post('/signup', async (req, res) => {
       await res.status(200).send({ token, user });
     }
   } catch (e) {
+    const result = await AuthUser.deleteOne({ email: authUser.email });
+    console.log(result);
     res.status(401).send(e.message);
   }
 });
