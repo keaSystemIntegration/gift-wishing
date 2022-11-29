@@ -1,16 +1,33 @@
 version: '3.4'
 services:
-  lb:
-    deploy:
-      resources:
-        limits:
-          cpus: "0.50"
-          memory: "512M"
-    image: giftwishingwe.azurecr.io/haproxy
-    build: ./haproxy
-    ports:
-      - '80:80'
+    proxy:
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.50'
+                    memory: '512M'
+        image: giftwishingwe.azurecr.io/haproxy
+        build: ./haproxy
+        ports:
+            - '80:80'
+            - '22:22'
+        environment:
+            - JWT_SECRET=${AUTH_SERVICE_JWT_SECRET}
+        restart: on-failure
+
     restart: on-failure
+
+    rabbitmq-server:
+        image: giftwishingwe.azurecr.io/rabbitmq-server
+        container_name: rabbitmq-server
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.50'
+                    memory: '512M'
+        build: ./modules/rabbitmq-server
+        environment:
+            - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
 
   redis-service:
     container_name: redis-server
@@ -20,17 +37,27 @@ services:
       dockerfile: Dockerfile
     restart: on-failure
 
-  rabbitmq-server:
-      image: giftwishingwe.azurecr.io/rabbitmq-server
-      container_name: rabbitmq-server
-      deploy:
-        resources:
-          limits:
-            cpus: "0.50"
-            memory: "512M"
-      build: ./modules/rabbitmq-server
-      environment:
-        - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
+    sftp-service:
+        image: giftwishingwe.azurecr.io/sftp-service
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.50'
+                    memory: '512M'
+        ports:
+            - '22:22'
+        container_name: sftp-service
+        build: ./modules/sftp-service
+        volumes:
+            - sftp-upload:/home/$SFTP_USER/upload
+        environment:
+            - SFTP_USER=$SFTP_USER
+            - QUEUE_ENDPOINT=$QUEUE_ENDPOINT
+            - RABBITMQ_SERVER=$RABBITMQ_SERVER
+            - RABBITMQ_USER=$RABBITMQ_USER
+            - RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD
+        depends_on:
+            - rabbitmq-server
 
   sftp-service:
     image: giftwishingwe.azurecr.io/sftp-service
@@ -109,22 +136,21 @@ services:
       - EMAIL_SERVER_ACCESS_TOKEN=${EMAIL_SERVER_ACCESS_TOKEN}
       - EMAIL_SERVER_SENDER_EMAIL=${EMAIL_SERVER_SENDER_EMAIL}
       - EMAIL_SERVER_SENDER_PASSWORD=${EMAIL_SERVER_SENDER_PASSWORD}
-
-  auth-service:
-    image: giftwishingwe.azurecr.io/auth-service
-    deploy:
-      resources:
-        limits:
-          cpus: "0.50"
-          memory: "512M"
-    build: ./modules/auth-service
-    environment:
-      - APPID=4500
-      - MONGO_USERNAME=${MONGO_USERNAME}
-      - MONGO_PASSWORD=${MONGO_PASSWORD}
-      - MONGO_DATABASE=${MONGO_DATABASE}
-      - JWT_SECRET=${JWT_SECRET}
-
+      - EMAIL_SERVER_SENDER_PASSWORD=${EMAIL_SERVER_SENDER_PASSWORD}
+    auth-service:
+        image: giftwishingwe.azurecr.io/auth-service
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.50'
+                    memory: '512M'
+        build: ./modules/auth-service
+        environment:
+            - APPID=4500
+            - AUTH_SERVICE_MONGO_USERNAME=${AUTH_SERVICE_MONGO_USERNAME}
+            - AUTH_SERVICE_MONGO_PASSWORD=${AUTH_SERVICE_MONGO_PASSWORD}
+            - AUTH_SERVICE_MONGO_DATABASE=${AUTH_SERVICE_MONGO_DATABASE}
+            - AUTH_SERVICE_JWT_SECRET=${AUTH_SERVICE_JWT_SECRET}
 
 volumes:
     sftp-upload:

@@ -1,12 +1,14 @@
 version: '3.4'
 services:
-    lb:
+    proxy:
         build: ./haproxy
         ports:
             - '80:80'
             - '22:22'
         volumes:
             - ./haproxy:/usr/local/etc/haproxy
+        environment:
+            - JWT_SECRET=${AUTH_SERVICE_JWT_SECRET}
         restart: on-failure
 
     rabbitmq-server:
@@ -89,11 +91,10 @@ services:
         build: ./modules/auth-service
         environment:
             - APPID=4500
-            - MONGO_USERNAME=${MONGO_USERNAME}
-            - MONGO_PASSWORD=${MONGO_PASSWORD}
-            - MONGO_DATABASE=${MONGO_DATABASE}
-            - JWT_SECRET=${JWT_SECRET}
-    
+            - AUTH_SERVICE_MONGO_USERNAME=${AUTH_SERVICE_MONGO_USERNAME}
+            - AUTH_SERVICE_MONGO_PASSWORD=${AUTH_SERVICE_MONGO_PASSWORD}
+            - AUTH_SERVICE_MONGO_DATABASE=${AUTH_SERVICE_MONGO_DATABASE}
+            - AUTH_SERVICE_JWT_SECRET=${AUTH_SERVICE_JWT_SECRET}
     wishlist-service:
         build:
             context: ./modules/wishlist-service
@@ -112,4 +113,3 @@ services:
 volumes:
     sftp-upload:
     haproxy:
-

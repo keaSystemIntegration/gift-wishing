@@ -9,6 +9,3 @@ fi
 chown 1001 -R /home/"$SFTP_SERVICE_USERNAME"/upload/products.db
 result=$?
 echo $result
-
-
-
