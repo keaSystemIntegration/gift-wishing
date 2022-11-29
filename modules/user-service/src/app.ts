@@ -8,7 +8,7 @@ import { emailServerUrl } from './services/email-server-service'
 
 const app = express()
 
-const port = process.env.PORT
+const port = process.env.USER_SERVICE_PORT
 app.use(express.json())
 app.use(cookieParser())
 app.use('/user', userRoutes)
