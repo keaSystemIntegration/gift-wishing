@@ -73,7 +73,7 @@ router.patch('/', getWishlist, async (req, res) => {
   }
 });
 
-router.delete('/:id', getWishlist, async (req, res) => {
+router.delete('/', getWishlist, async (req, res) => {
   try {
     const wishlist = res.wishlist;
     await wishlist.remove();
@@ -83,7 +83,6 @@ router.delete('/:id', getWishlist, async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
 
 async function getWishlist(req, res, next) {
   let wishlist = null;
