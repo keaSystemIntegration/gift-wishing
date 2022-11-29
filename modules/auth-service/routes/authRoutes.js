@@ -34,7 +34,7 @@ router.post('/signup', async (req, res) => {
     // invitation requires a token to be sent
     // try {
     if (inviteToken) {
-      const response = axios.post(
+      const response = await axios.post(
         'http://proxy/user/invite/accept',
         {
           token: inviteToken,
@@ -49,10 +49,20 @@ router.post('/signup', async (req, res) => {
         }
       );
 
-      console.log((await response).data);
+      console.log(response);
+
+      if (response.data) {
+        console.log(response.data);
+        await res.status(200).send({ token, user });
+      } else {
+        const result = await AuthUser.deleteOne({ email: authUser.email });
+        console.log(result);
+      }
+
+      console.log(response.data);
       await res.status(200).send({ token, user });
     } else {
-      const response = axios.post(
+      const response = await axios.post(
         'http://proxy/user/user',
         {
           userId: authUser._id.toString(),
@@ -67,12 +77,18 @@ router.post('/signup', async (req, res) => {
         }
       );
 
-      console.log((await response).data);
-      await res.status(200).send({ token, user });
+      console.log(response);
+      console.log('DATA', response.data);
+
+      if (response.data) {
+        console.log(response.data);
+        await res.status(200).send({ token, user });
+      } else {
+        const result = await AuthUser.deleteOne({ email: authUser.email });
+        console.log(result);
+      }
     }
   } catch (e) {
-    const result = await AuthUser.deleteOne({ email: authUser.email });
-    console.log(result);
     res.status(401).send(e.message);
   }
 });
