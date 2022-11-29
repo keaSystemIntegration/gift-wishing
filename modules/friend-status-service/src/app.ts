@@ -40,7 +40,7 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents> (server, {
 });
 
 
-function getFriendsStatusAndNotifyFriends(USER_SOCKET_ROOM: string, FRIENDS_LIST: IFriend[]) {
+function getFriendsStatusAndNotifyFriends(USER_SOCKET_ROOM: string, FRIENDS_LIST: IFriend[], socket: Socket) {
   if ( FRIENDS_LIST.length ) {
     FRIENDS_LIST.forEach(friend => {
       // get friend's socket room
@@ -53,7 +53,7 @@ function getFriendsStatusAndNotifyFriends(USER_SOCKET_ROOM: string, FRIENDS_LIST
       // if the friend's room exists it means the friend is online
       if (io.sockets.adapter.rooms.get(friendSocketRoom)) {
         // emit to friend that user is on
-        io.to(friendSocketRoom).emit("update_user_status", USER_SOCKET_ROOM, 'on');
+        socket.to(friendSocketRoom).emit("update_user_status", USER_SOCKET_ROOM, 'on');
         // set friend status for the user
         friend.status = 'on';
       } else {
@@ -81,7 +81,7 @@ io.on("connection", (socket: Socket) => {
     // console.log('rooms', io.sockets.adapter.rooms)
 
     // get list of friends with statuses and notify active friends that the user is online
-    const friendsList = getFriendsStatusAndNotifyFriends(USER_SOCKET_ROOM, FRIENDS_LIST);
+    const friendsList = getFriendsStatusAndNotifyFriends(USER_SOCKET_ROOM, FRIENDS_LIST, socket);
     // emit to user the list of friends with statuses
     socket.emit("friends_status", friendsList);
   });
@@ -96,7 +96,7 @@ io.on("connection", (socket: Socket) => {
         if (io.sockets.adapter.rooms.get(friendSocketRoom)) {
           // emit to friend that user is disconnected only if user has all sockets(connections) closed
           if (!io.sockets.adapter.rooms.has(USER_SOCKET_ROOM)) {
-            io.to(friendSocketRoom).emit("update_user_status", USER_SOCKET_ROOM, 'off');
+            socket.to(friendSocketRoom).emit("update_user_status", USER_SOCKET_ROOM, 'off');
           }
         }
       });

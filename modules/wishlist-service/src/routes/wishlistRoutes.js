@@ -15,7 +15,7 @@ router.get('/all', async (req, res) => {
   }
 });
 
-// get friends' wishlists
+// get wishlists
 router.get('/', async (req, res) => {
   if (req.body.friendsList === null) {
     return res.status(404).json({ message: "Friends list missing" });
