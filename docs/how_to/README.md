@@ -1,67 +1,28 @@
 # How to
 
 ## _Local environment_
-In order to create the project on your local machine you will need to have docker.
+In order to create the project on your local machine you will need to have docker installed.
 You can find explanation on how to install docker here: https://docs.docker.com/get-docker/ .
 
-After you have installed docker, you will need to set up environment variable.  
-To do so, create a .env file on the root directory. The file should be fill out as following:
-
-```
-STORAGE_VOLUME_USERNAME=
-STORAGE_VOLUME_PASSWORD=
-SFTP_SERVICE_PASSWORD=
-SFTP_SERVICE_USERNAME=
-SFTP_SERVICE_URL=
-RABBITMQ_SERVICE_HOST=
-RABBITMQ_SERVICE_USER=
-RABBITMQ_SERVICE_PASSWORD=
-
-MONGO_USERNAME=
-MONGO_PASSWORD=
-MONGO_DATABASE=
-JWT_SECRET=
-
-FRIEND_STATUS_SERVICE_PORT=
-
-WISHLIST_SERVICE_PORT=
-WISHLIST_CONNECTION_URL=
-```
-
-In addition, you will need to create a separate .env file in root/modules/user-service
-The content of this env file should be as following
-
-```
-PORT=
-
-NEO4J_URL=
-NEO4J_USERNAME=
-NEO4J_PASSWORD=
-AURA_INSTANCENAME=
-
-JWT_SECRET=
-SIGNUP_URL=
-EMAIL_SERVER_URL_LOCAL=
-EMAIL_SERVER_URL_PROD=
-EMAIL_SERVER_ACCESS_TOKEN=
-
-EMAIL_SERVER_SENDER_EMAIL=
-EMAIL_SERVER_SENDER_PASSWORD=
-```
-
+After you have installed docker, you will need to set up several environment variables.  
 To get the official env please contact us.
-
 
 After you set up the env, locate your terminal in the root directory and execute
 
 ```
-docker compose up
+docker-compose up
 ```
 
 ## Online Version
 
 This app can be found online at _________. 
-This version is host on azure. 
+This version is hosted on Microsoft Azure.
+
+# Proxy 
+Lorem ipsum
+
+# Auth
+Lorem ipsum
 
 # Products
 The products service is a service that expose for the user a graphql endpoint where it can fetch a list of products 
@@ -91,7 +52,7 @@ The products service is using redis to store you most recent results for any req
 and products. The cache has time to live of 60 seconds
 
 # SFTP
-In the application you will find sftp server that runs on port 22 the credentials can be found in the .env. 
+In the application you will find sftp server that runs on port 22 (sftp:$user:password@$endpoint) the credentials can be found in the .env. 
 It can be accessed with any sftp client (fx: [Cyberduck](https://cyberduck.io/), [FileZilla](https://filezilla-project.org/))
 After accessing the server you can view or replace the products.db. Please note that you should follow the schema as 
 described at the products section, or communicate with the development team if needed.
@@ -99,5 +60,64 @@ described at the products section, or communicate with the development team if n
 
 ![products vs sftp relation](../overview_of_the_system/products-sftp-diagram.png)
 
+
 # Nice Logo path
 The service is providing a logo which is hosted on azure cdn you can get the url for accessing the cdn through the development team
+
+# Environment Variables
+Here you can see all the required envs, to get the access to them please contact the development team
+```
+# AZURE STORAGE
+STORAGE_VOLUME_USERNAME=
+STORAGE_VOLUME_PASSWORD=
+USER_SERVICE_AZURE_BLOB_STORAGE_CONNECTION=
+USER_SERVICE_AZURE_BLOB_STORAGE_CONTAINER=
+
+# SFTP_SERVICE
+SFTP_SERVICE_PASSWORD=
+SFTP_SERVICE_USERNAME=
+SFTP_SERVICE_URL=
+
+# RABBITMQ SERVICE
+RABBITMQ_SERVICE_HOST=
+RABBITMQ_SERVICE_USER=
+RABBITMQ_SERVICE_PASSWORD=
+
+# PRODUCTS SERVICE
+PRODUCTS_SERVICE_POST=
+PRODUCTS_SERVICE_DATABASE_URL=
+
+# REDIS SERVICE
+PRODUCTS_SERVICE_REDIS_URL=
+
+# AUTH SERVICE
+AUTH_SERVICE_MONGO_USERNAME=
+AUTH_SERVICE_MONGO_PASSWORD=
+AUTH_SERVICE_MONGO_DATABASE=
+AUTH_SERVICE_JWT_SECRET=
+
+# USER SERVICE
+USER_SERVICE_PORT=
+USER_SERVICE_NEO4J_URL=
+USER_SERVICE_NEO4J_USERNAME=
+USER_SERVICE_NEO4J_PASSWORD=
+USER_SERVICE_AURA_INSTANCENAME=
+
+USER_SERVICE_JWT_SECRET=
+USER_SERVICE_SIGNUP_URL=
+
+# EMAIL SERVER (Note - used in USER SERVICE)
+EMAIL_SERVER_URL_LOCAL=
+EMAIL_SERVER_URL_PROD=
+EMAIL_SERVER_ACCESS_TOKEN=
+EMAIL_SERVER_SENDER_EMAIL=
+EMAIL_SERVER_SENDER_PASSWORD=
+
+# WISHLIST SERVICE
+WISHLIST_SERVICE_PORT=
+WISHLIST_CONNECTION_URL=
+
+# FRIEND STATUS SERVICE
+FRIEND_STATUS_SERVICE_PORT=
+```
+

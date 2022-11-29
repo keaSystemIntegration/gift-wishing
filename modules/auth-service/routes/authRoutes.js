@@ -14,9 +14,11 @@ const JWT_SECRET = process.env.AUTH_SERVICE_JWT_SECRET;
 router.post('/signup', async (req, res) => {
   const { email, name, username, password, inviteToken } = req.body;
 
+  if (!email || !password || !username || !name) {
+    return res.status(422).send({ error: 'Must provide user details' });
+  }
+
   try {
-    // const session = await mongoose.startSession();
-    // session.withTransaction(async () => {
     const authUser = new AuthUser({ email, password, username, name });
     await authUser.save();
 
@@ -27,53 +29,63 @@ router.post('/signup', async (req, res) => {
       username: authUser.username
     };
 
-    console.log(authUser.email);
-
-    // integration team can perform sign up and friend invitation acceptance in the same way
-    // invitation requires a token to be sent
-    if (inviteToken) {
-      axios
-        .post('http://lb/user/invite/accept', {
-          token: inviteToken,
-          email: user.email,
-          username: user.username,
-          name: authUser.name
-        })
-        .then((response) => {
-          console.log(response.data);
-        })
-        .catch(async (error) => {
-          console.log(error);
-          const result = await AuthUser.deleteOne({ email: authUser.email });
-          console.log(result);
-        });
-    } else {
-      axios
-        .post('http://lb/user/user', {
-          userId: authUser._id.toString(),
-          email: user.email,
-          username: user.username,
-          name: authUser.name
-        })
-        .then((response) => {
-          console.log(response.data);
-        })
-        .catch(async (error) => {
-          console.log(error);
-          const result = await AuthUser.deleteOne({ email: authUser.email });
-          console.log(result);
-        });
-    }
-
     const token = jwt.sign(user, JWT_SECRET);
 
-    console.log('Token:', token);
+    // integration team can perform sign up and friend invitation acceptance in the same way
+    // invitation requires a token to be sent, however
+    if (inviteToken) {
+      try {
+        const response = await axios.post(
+          'http://proxy/user/invite/accept',
+          {
+            token: inviteToken,
+            email: user.email,
+            username: user.username,
+            name: authUser.name
+          },
+          {
+            headers: {
+              Authorization: 'Bearer ' + token
+            }
+          }
+        );
 
-    res.status(200).send({ token, user });
-    // });
-    // await session.endSession();
+        if (response.data) {
+          res.status(200).send({ token, user });
+        }
+      } catch (e) {
+        const result = await AuthUser.deleteOne({ email: authUser.email });
+        console.log(result);
+        return res.status(500).send('Error in the User Service', e.message);
+      }
+    } else {
+      try {
+        const response = await axios.post(
+          'http://proxy/user/user',
+          {
+            userId: authUser._id.toString(),
+            email: user.email,
+            username: user.username,
+            name: authUser.name
+          },
+          {
+            headers: {
+              Authorization: 'Bearer ' + token
+            }
+          }
+        );
+
+        if (response.data) {
+          res.status(200).send({ token, user });
+        }
+      } catch (e) {
+        const result = await AuthUser.deleteOne({ email: authUser.email });
+        console.log(result);
+        return res.status(500).send({ error: 'Error in User Service: ' + e.message });
+      }
+    }
   } catch (e) {
-    return res.status(422).send(e.message); // invalid data
+    res.status(500).send({ error: e.message });
   }
 });
 

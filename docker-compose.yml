@@ -95,6 +95,7 @@ services:
             - AUTH_SERVICE_MONGO_PASSWORD=${AUTH_SERVICE_MONGO_PASSWORD}
             - AUTH_SERVICE_MONGO_DATABASE=${AUTH_SERVICE_MONGO_DATABASE}
             - AUTH_SERVICE_JWT_SECRET=${AUTH_SERVICE_JWT_SECRET}
+
     wishlist-service:
         build:
             context: ./modules/wishlist-service
@@ -103,7 +104,6 @@ services:
             - WISHLIST_SERVICE_PORT=${WISHLIST_SERVICE_PORT}
             - WISHLIST_CONNECTION_URL=${WISHLIST_CONNECTION_URL}
        
-
     friend-status-service:
         build:
             context: ./modules/friend-status-service
