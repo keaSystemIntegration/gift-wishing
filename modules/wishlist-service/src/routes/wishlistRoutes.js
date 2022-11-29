@@ -16,7 +16,7 @@ router.get('/all', async (req, res) => {
 });
 
 // get wishlists
-router.get('/', async (req, res) => {
+router.get('/friends', async (req, res) => {
   if (req.body.friendsList === null) {
     return res.status(404).json({ message: "Friends list missing" });
   }
@@ -33,21 +33,21 @@ router.get('/', async (req, res) => {
 });
 
 // get user's wishlist
-router.get('/:id', async(req, res) => {
-  // console.log(req.params.id);
+router.get('/', async(req, res) => {
+  const { userId, email } = JSON.parse(req.cookies.Claims);
 
   try {
-    const wishlist = await Wishlist.find({ userId: req.params.id });
-    // console.log(wishlist)
+    const wishlist = await Wishlist.find({ userId: userId });
+
     // create a new wishlist for new users
     if (wishlist.length === 0) {
       const newWishlist = new Wishlist({
-        userId: req.params.id
+        userId: userId
       });
       await newWishlist.save();
       return res.status(201).json({message: "Successfully created", wishlist: newWishlist} )
     } else {
-      return res.status(201).json( wishlist );
+      return res.status(200).json( wishlist );
     }
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -55,8 +55,8 @@ router.get('/:id', async(req, res) => {
 });
 
 // supplies a set of instructions to modify the resource instead of replacing it
-router.patch('/:id', getWishlist, async (req, res) => {
-  let newProducts;
+router.patch('/', getWishlist, async (req, res) => {
+  let newProducts = null;
   if (Array.isArray(req.body.products)) {
     newProducts = req.body.products;
   } else {
@@ -86,9 +86,11 @@ router.delete('/:id', getWishlist, async (req, res) => {
 
 
 async function getWishlist(req, res, next) {
-  let wishlist;
+  let wishlist = null;
+  const { userId, email } = JSON.parse(req.cookies.Claims);
+
   try {
-    wishlist = await Wishlist.find({ userId: req.params.id });
+    wishlist = await Wishlist.find({ userId: userId });
     if (wishlist.length === 0) {
       return res.status(404).json({ message: 'Cannot find wishlist' })
     }

@@ -1,6 +1,7 @@
 import express from 'express';
 import "dotenv/config";
 import mongoose from 'mongoose';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 
@@ -13,6 +14,7 @@ db.on('error', (error) => console.log(error));
 db.once('open', () => console.log('Connected to Wishlist Mongo Database'));
 
 app.use(express.json());
+app.use(cookieParser());
 
 import wishlistsRouter from './routes/wishlistRoutes.js';
 app.use('/', wishlistsRouter);
