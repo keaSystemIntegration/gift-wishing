@@ -39,6 +39,10 @@ userRoutes.get('/w-friends', async (req, res) => {
 userRoutes.post('/', async (req, res) => {
 	try{
 		const { userId, name, username, email } = req.body;
+		if(!userId || !name || !username || !email){
+			console.log("Missing something here in userRoutes.post: \n userId: " + userId + ", name: " + name + ", username: " + ", email: " + email);
+			throw new Error("Missing something here in userRoutes.post:  userId: " + userId + ", name: " + name + ", username: " + ", email: " + email);
+		}
 		console.log("We've gotten to the router at least: " + name + ", " + username + " and " + email)
 		const dbResponse = await userService.createUser(userId, name, username, email);
 		res.json(dbResponse);

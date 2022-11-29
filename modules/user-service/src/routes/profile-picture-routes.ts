@@ -1,12 +1,11 @@
 import { Router } from "express";
+import { profilePictureGuard } from "../middleware/profile-picture-guard";
 import { azureDelete, azureFetch, azureUpload, upload } from "../services/profile-picture-service";
-
-
 
 export const profilePictureRoutes = Router();
 
 
-profilePictureRoutes.get('/:username', async (req, res) => {
+profilePictureRoutes.get('/:username', profilePictureGuard, async (req, res) => {
 	try {
 		const { username } = req.params;
 		if(!username)
@@ -16,11 +15,11 @@ profilePictureRoutes.get('/:username', async (req, res) => {
 		res.send(azResponse);
 	} catch (err) {
 		console.log(`Error in profilePictureRoutes.get('/'): \n` + err.message);
-		res.status(500).send({error: err.message});
+		res.status(404).send({error: err.message});
 	}
 });
 
-profilePictureRoutes.post('/', upload.single('file'), async (req, res) => {
+profilePictureRoutes.post('/', upload.single('file'), profilePictureGuard, async (req, res) => {
 	try {
 		const ONE_MEGABYTE = 1024 * 1024;
 		const { buffer, size, mimetype } = req.file;
@@ -48,7 +47,7 @@ profilePictureRoutes.post('/', upload.single('file'), async (req, res) => {
 });
 
 
-profilePictureRoutes.delete('/', async (req, res) => {
+profilePictureRoutes.delete('/', profilePictureGuard, async (req, res) => {
 	try {
 		const { username } = req.body;
 		if(!username)
