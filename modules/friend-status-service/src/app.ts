@@ -112,6 +112,6 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.FRIEND_STATUS_SERVICE_PORT || 8080;
 server.listen(PORT, () => {
-  console.log(`FRIEND STATUS server is running on: http://localhost:${PORT}`);
+  console.log(`FRIEND STATUS server is running on PORT: ${PORT}`);
 })
 

@@ -19,5 +19,5 @@ app.use('/', wishlistsRouter);
 
 const PORT = WISHLIST_SERVICE_PORT || 8001;
 app.listen(PORT, () => {
-  console.log(`WISHLIST server is running on: http://localhost:${PORT}`);
+  console.log(`WISHLIST server is running on PORT: ${PORT}`);
 })
