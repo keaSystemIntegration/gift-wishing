@@ -21,6 +21,17 @@ MONGO_USERNAME=
 MONGO_PASSWORD=
 MONGO_DATABASE=
 JWT_SECRET=
+
+FRIEND_STATUS_SERVICE_PORT=
+
+WISHLIST_SERVICE_PORT=
+WISHLIST_CONNECTION_URL=
+```
+
+In addition, you will need to create a separate .env file in root/modules/user-service
+The content of this env file should be as following
+
+```
 PORT=
 
 NEO4J_URL=

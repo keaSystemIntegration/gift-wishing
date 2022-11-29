@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Friends pane</title>
+
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+
+<body>
+  <label for="username">Name:</label>
+  <input type="text" id="username" name="username" /><br>
+
+  <div class="friends-list-wrapper"></div>
+</body>
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+
+  function getUserAndFriendsList() {
+    const inputOptions = [
+      userAndFriendsList0 = {
+        userId: "1110",
+        friendsList: [
+          { username: "name1", userId: "1111" },
+          { username: "name2", userId: "1112" },
+          { username: "name3", userId: "1113" }
+        ]
+      },
+      userAndFriendsList1 = {
+        userId: "1111",
+        friendsList: [
+          { username: "name0", userId: "1110" },
+          { username: "name2", userId: "1112" },
+          { username: "name3", userId: "1113" }
+        ]
+      },
+      userAndFriendsList2 = {
+        userId: "1112",
+        friendsList: [
+          { username: "name0", userId: "1110" },
+          { username: "name1", userId: "1111" },
+          { username: "name4", userId: "1114" }
+        ]
+      },
+      userAndFriendsList3 = {
+        userId: "1113",
+        friendsList: [
+          { username: "name0", userId: "1110" },
+          { username: "name1", userId: "1111" },
+          { username: "name4", userId: "1114" }
+        ]
+      },
+      userAndFriendsList4 = {
+        userId: "1114",
+        friendsList: [
+          { username: "name3", userId: '1113' }, 
+          { username: "name2", userId: '1112' }, 
+          { username: null, userId: null } 
+        ]
+      }
+    ];
+    
+    const userAndFriendsList = inputOptions[Math.floor(Math.random() * 5)];
+
+    console.log(userAndFriendsList)
+    $(".friends-list-wrapper")
+      .append(`
+      <div>${userAndFriendsList.userId}</div>`);
+    return userAndFriendsList;
+  }
+
+  (function () {
+    const userAndFriendsList = getUserAndFriendsList();
+    if (userAndFriendsList) {
+      socket.emit("user_connected", userAndFriendsList);
+
+      // friendsList is an array of objects of this form: { username: <string>, userId: <uuid>, status: <string> }
+      socket.on("friends_status", (friendsList) => {
+        friendsList.forEach(friend => {
+          $(".friends-list-wrapper")
+            .append(`
+            <div class="user-row" id="${friend.userId}">
+              <span class="user-username" >Name: ${friend.username}</span>,
+              <span class="user-status" >Status: ${friend.status}</span>
+            </div>
+            `);
+        });
+      });
+    }
+  })();
+
+  
+
+  // userId is an variable of type uuid
+  // triggered when an user connects or disconnects   
+  socket.on("update_user_status", (userId, status) => {
+    console.log(userId, status)
+    if (userId) {
+      $(`#${userId} .user-status`).text(`Status: ${status}`)
+    }
+  });
+
+</script>
+
+</html>

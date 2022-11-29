@@ -1,0 +1,36 @@
+GET http://localhost:8001/all
+
+###
+GET http://localhost:8001/
+Content-Type: application/json
+
+{
+  "friendsList": ["post-ID-example4", "post-ID-example3"]
+}
+
+###
+GET http://localhost:8001/post-ID-example3
+
+
+###
+PATCH http://localhost:8001/post-ID-example4
+Content-Type: application/json
+
+{
+  "products": [
+    {
+      "name": "patch-name-example4",
+      "url": "patch-url-example4"
+    },
+    {
+      "name": "patch-name-example4",
+      "url": "patch-url-example4"
+    },
+    {
+      "name": "patch-name-example4",
+      "url": "patch-url-example4"
+    }
+  ]
+}
+###
+DELETE http://localhost:8001/post-ID-example4
