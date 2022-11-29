@@ -7,7 +7,7 @@ import { Server, Socket } from "socket.io";
 const app = express();
 const server = http.createServer(app);
 
-app.use(express.static("public"));
+// app.use(express.static("public"));
 app.use(cors());
 
 dotenv.config();
@@ -38,7 +38,6 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents> (server, {
     methods: ["GET", "POST"]
   }
 });
-
 
 function getFriendsStatusAndNotifyFriends(USER_SOCKET_ROOM: string, FRIENDS_LIST: IFriend[], socket: Socket) {
   if ( FRIENDS_LIST.length ) {
