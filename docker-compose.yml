@@ -18,6 +18,14 @@ services:
         #     - '5672:5672'
         #     - '15672:15672'
 
+    redis-service:
+      container_name: redis-server
+      build:
+        context: ./modules/redis-service
+        dockerfile: Dockerfile
+      restart: on-failure
+
+
     sftp-service:
         container_name: sftp-service
         build:
@@ -43,13 +51,14 @@ services:
         container_name: products-service
         environment:
             - PORT=$PRODUCTS_SERVICE_POST
-            - DATABASE_URL=$PRODUCTS_SERVICE_URL
+            - PRODUCTS_SERVICE_DATABASE_URL=$PRODUCTS_SERVICE_DATABASE_URL
             - SFTP_SERVICE_URL=$SFTP_SERVICE_URL
             - SFTP_SERVICE_USERNAME=$SFTP_SERVICE_USERNAME
             - SFTP_SERVICE_PASSWORD=$SFTP_SERVICE_PASSWORD
             - RABBITMQ_SERVICE_HOST=$RABBITMQ_SERVICE_HOST
             - RABBITMQ_SERVICE_USER=$RABBITMQ_SERVICE_USER
             - RABBITMQ_SERVICE_PASSWORD=$RABBITMQ_SERVICE_PASSWORD
+            - PRODUCTS_SERVICE_REDIS_URL=$PRODUCTS_SERVICE_REDIS_URL
         restart: on-failure #find a better solution for timing the docker image
         depends_on:
             - sftp-service

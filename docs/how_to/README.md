@@ -66,7 +66,7 @@ This version is host on azure.
 # Products
 The products service is a service that expose for the user a graphql endpoint where it can fetch a list of products 
 or a single product by id. 
-After initialising the app the documentation for the graphql server can be found in http://{endpoint}/products/graphql
+After initialising the app the documentation for the graphql server can be found in http://{endpoint}/products
 
 The products are stored in a single table in the sql server. the structure is as following 
 
@@ -78,14 +78,17 @@ The products are stored in a single table in the sql server. the structure is as
 The database type is sqlite that exist inside the products service. If you would like to update the db and create new 
 entry you should follow the current schema that describe in the table above. 
 To upload the new db you should access the sftp server and replace the current db file with your new file. The file name
-has to be named ```products.db```. The product service is listing to a que and in a case that there is a new message in that
-que, it will update the db
+has to be named ```products.db```. The product service is listening to a que, and in a case that there is a new message in that
+que, it will download the new database file to the product service (view sequence diagram below)
 
 The sftp service can be access on localhost:22. The sftp server connected to a que (RabbitMQ) and in a case that the 
 ```products.db``` has been updated it will add a message to the que.
 
 In case that you would like to change the current db structure please contact the development team, and we will update it
 as you wish.
+
+The products service is using redis to store you most recent results for any request that has been sent to product 
+and products. The cache has time to live of 60 seconds
 
 # SFTP
 In the application you will find sftp server that runs on port 22 the credentials can be found in the .env. 
