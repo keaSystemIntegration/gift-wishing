@@ -12,13 +12,13 @@ const router = express.Router();
 const JWT_SECRET = process.env.AUTH_SERVICE_JWT_SECRET;
 
 router.post('/signup', async (req, res) => {
-  const { email, name, username, password, inviteToken } = req.body;
-
-  if (!email || !password || !username || !name) {
-    return res.status(422).send({ error: 'Must provide user details' });
-  }
-
   try {
+    const { email, name, username, password, inviteToken } = req.body;
+
+    if (!email || !password || !username || !name) {
+      return res.status(422).send({ error: 'Must provide user details' });
+    }
+
     const authUser = new AuthUser({ email, password, username, name });
     await authUser.save();
 
