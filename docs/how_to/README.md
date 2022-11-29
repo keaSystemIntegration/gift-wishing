@@ -13,6 +13,10 @@ After you set up the env, locate your terminal in the root directory and execute
 docker-compose up
 ```
 
+NOTE: Email service/server is hosted on Azure, and is not part of this repository.
+The command mentioned above, will spin up the 'production' version of the user-service, 
+using the email server on Azure and therefore you don't need to set it up locally.
+
 ## Online Version
 
 This app can be found online at _________. 
@@ -59,6 +63,405 @@ described at the products section, or communicate with the development team if n
 
 
 ![products vs sftp relation](../overview_of_the_system/products-sftp-diagram.png)
+
+
+# User Service
+**ROOT:** /user
+
+All endpoints are documented ```In this format``` will be the full route to that endpoint, but in each section, the relevant suffix might be used.
+
+The words endpoint(s) and route(s) might be used interchangeably in this section.
+
+Beneath all routes, you'll see if the endpoint requires a body or parameter, optionals will have a ```?``` suffix.
+Some optionals might not make a difference unless you disable the userGuard and profilePictureGuard respectively, as explained here below.
+
+**NOTE:** For convenience, we will in some cases refer to Models (First letter capital) and ENUMS (all capital) 
+
+## User Guard and Profile Picture Guard
+All routes/endpoints in the user service are protected by the middleware "userGuard".
+Meaning that it will not work to for example read other users friends, update or delete another user, etc.
+So even though some endpoints accept a userId in the body, it will be overridden by the middleware to be that of the user sending the request.
+
+During development this might be annoying, to disable the guard, simply comment out the line with ```app.use(userGuard)``` in ```app.ts```.
+
+Same applies for the profile picture endpoints (e.g. as a user, you can not CRUD another users profile picture), as all of them are protected by "profilePictureGuard" but due to another middleware being used for these routes, you'll have to disable the guard for each endpoint.
+
+## Models and Enums
+Models and enums are used in this documentation for output information from the endpoints in this service.
+Here, as with routes, optionals will have suffix: ```?```
+### User
+```
+{
+  userId, string,
+  name: string,
+  username: string,
+  email: string,
+  signupDate: Date,
+  friends?: Friend[]
+}
+```
+
+**NOTE:** A user object has an optional field of a friends array which is not used except for a single endpoint ```/user/user/w-friends```.
+
+### Friend
+```
+{
+  friendId: string,
+  friendName: string,
+  friendEmail: string,
+  friendStatus: FriendStatus,
+  requestedBy?: string
+}
+```
+
+### FriendStatus
+ENUM: ```INVITED | REQUESTED | ACCEPTED```
+
+## Friends and relationship information
+Friend objects include an enum value in the field “friendStatus”, with the three possible values seen above.
+For better context, see what each of them means:
+
+**INVITED:**
+User has sent an invite to a friend that has not yet registered to the application. The ```Friend``` object will have temporary values in the fields: ```userId, name, username, and signupDate```.
+If the friend accepts the invitation from the user, these values will be updated and the ```friendStatus``` field set to ```ACCEPTED```.
+
+**ACCEPTED:**
+A friend with friendStatus ```ACCEPTED```, means that either the user or the friend has accepted an invitation to register the application, or accepted a friend request, from either the friend or the user (whoever sent the invitation/friend-request)
+
+**REQUESTED:**
+Either the user has sent a friend request to the friend, or the friend has sent a friend request to the user.
+If ```friendStatus == REQUESTED```, there will be an additional field in the friend object ```requestedBy```, who’s value will be the ```userId```, of the user that sent the friend-request.
+So if ```requestedBy == friendId```, the user has a friend request from this (potential) friend.
+If ```requestedBy == userId```, the user has sent a friend request to this (potential) friend.
+
+
+## Routes
+### Overview (All user service routes)
+```/user/friend/all``` @[GET]
+
+```/user/friend/by-status``` @[GET]
+
+```/user/invite/send``` @[POST]
+
+```/user/invite/accept``` @[POST]
+
+```/user/user``` @[GET | POST | PUT | DELETE]
+
+```/user/w-friends``` @[GET]
+
+```/user/relationship``` @[POST | PUT | DELETE]
+
+```/user/profile-picture``` @[GET | POST | DELETE]
+
+
+### Friend Routes (2)
+**ROOT:** /friend
+#### Endpoints
+
+
+##### Get all friends
+```/user/friend/all```
+
+**Input:**
+```
+{
+  userId?: string
+}
+```
+
+**Output:** 
+```Friend[]```
+
+##### Get All friends by status
+```/user/friend/by-status```
+
+**Input**
+```
+{
+  userId?: string,
+  "status": FriendStatus
+}
+```
+**Output:** 
+```Friend[]```
+
+**NOTE:** valid status values: ```INVITED, REQUESTED, ACCEPTED```
+
+### Invite Routes (2)
+**ROOT:** /invite
+#### Endpoints
+
+##### Send friend invitation to email
+Will send invitation to the email ```friendEmail``` to join the application, if signed up through the invitation link, user will automatically become senders friend.
+
+**Signup link integration:** 
+Set signup link env: **USER_SERVICE_SIGNUP_URL**
+A JWT token will be appended as parameters of the url as ```token```.
+This token must be added to the signup form as an input field (presumably hidden).
+
+```/user/invite/send```
+
+**Input:**
+```
+{
+  userId?: string,
+	friendEmail: string
+}
+```
+
+**Output:**
+```{inviteStatus: "Success"}```
+
+##### Accept friend invitation from email [AUTH SERVICE]
+*This endpoint is for **auth-service**, endpoints for signing up a user can be seen in the auth-service section of this document.*
+
+```/user/invite/accept```
+
+**Input:**
+```
+{
+  userId?: string,
+  name: string,
+  username: string,
+  email: string,
+  token: JWT_TOKEN (from invitation email)
+}
+```
+
+**Output:**
+```User```
+
+### Relationship Routes (3)
+**ROOT:** /relationship
+These routes are for creating, updating and deleting relationships between users.
+*If you want to get users friends, see Friend routes.*
+#### Endpoints
+
+##### Modify friend relationships
+```/user/relationship```
+
+##### @PUT
+To update an existing relationship
+**Input:**
+```
+{
+  userId?: string,
+  friendId: string,
+  status: FriendStatus
+}
+```
+
+
+**Output:**
+```Friend```
+
+**NOTE:** valid status values: ```INVITED, REQUESTED, ACCEPTED```
+##### @POST
+To create a new relationship
+**Input:**
+```
+{
+  userId?: string,
+  friendId: string,
+}
+```
+
+**Output:**
+```Friend```
+
+##### @DELETE
+Use if friend deletes a relationship or rejects friend request.
+**Input:**
+```
+{
+  userId?: "exampleuserid",
+  friendId: "exampleFriendId",
+}
+```
+
+**Output:**
+```{deleted: boolean}```
+
+
+### Profile Picture Routes (3)
+**ROOT:** /profile-picture
+Routes for creating, deleting and updating users profile picture.
+All profile pictures are saved as: ```<username>_profile-picture.png```
+
+#### Endpoints
+```/user/profile-picture```
+##### @GET
+Get users profile picture.
+
+**Input (parameters):**
+```/:username```
+
+**Output:**
+```multipart/form-data```
+
+##### @POST
+Create/Upload a user profile picture.
+
+**Input:**
+```
+{
+  file: multipart/form-data [FILE]
+  username: multipart/form-data [TEXT]
+}
+```
+
+**Output:**
+```{message: string}```
+
+
+##### @DELETE
+Delete a user profile picture.
+
+**Input:**
+```
+{
+  username: string
+}
+```
+
+**Output:**
+```{message: string}```
+
+
+### User Routes (5)
+**ROOT** /user
+**NOTE:** user routes will have duplicate substrings ```/user``` in the route.
+#### Endpoints
+
+```/user/user```
+##### @GET
+Get user
+
+**Input (parameters):**
+```
+{
+  userId?: string
+}
+```
+
+**Output:**
+```User```
+
+##### @POST [AUTH SERVICE]
+Create a user.
+*Note this route is only for **aut-service**, end-users will not be able to query this endpoint due to guards and proxy settings*
+
+**Input:**
+```
+{
+  userId?: string,
+  name: string,
+  username: string,
+  email: string
+}
+```
+
+**Output:**
+```User```
+
+
+##### @DELETE
+Delete a user.
+**NOTE:** A user querying this endpoint will delete themselves, trying to delete another user, they'll instead delete themselves (happy hacking!).
+*If you want to disable that functionality during development, as mentioned before, disable the userGuard.*
+**Input:**
+```
+{
+  userId?: string
+}
+```
+
+**Output:**
+```User```
+
+##### Get user with friends
+```/user/user/w-friends```
+
+Get user with all their friends.
+
+**Input:**
+```
+{
+  userId?: string
+}
+```
+
+**Output:**
+```User```
+
+**NOTE:** A user object has an optional field of a friends array which is not used except for at in this endpoint.
+
+# Email Service/Server
+Email server is currently deployed to Azure, part of a function application.
+No integration is needed on this part of the application, however if something is not working and you want to rule it out as the culprit...
+
+Email Server link: https://wishlist-email-service.azurewebsites.net/api/Email-Service-HTTP?code=```EMAIL_SERVER_URL_PROD```
+The value for ```EMAIL_SERVER_URL_PROD``` can be found in the environment variables.
+### Sending an email
+Example request
+```
+{
+  "sender": {
+    "email": "wishlist.mail.sender@gmail.com"
+  },
+  "email": {
+    "to": "astt0003@stud.kea.dk",
+    "subject": "Subject check",
+    "html": "<p>something cool</p>",
+    "text": ""
+  },
+  "notification": {
+    "email": "a.bragason@gmail.com",
+    "onFailure": true,
+    "onSuccess": true
+  }
+}
+```
+
+#### Explanation
+**Sender:**
+*;TLDR; just keep it the same.*
+Our email service is set up to be able to send emails from different email accounts.
+This was made for future proofing, sending notification mails and error messages.
+Sender object has an optional field: ```password```, for emails that we want to restrict sending with for admins.
+
+**email:**
+Your bread and butter.
+Either set html or text for the body of the email - **please don't try to hack this**, html sanitazion isn't setup yet.
+
+**notification:**
+Mainly for debugging purposes, **note that it will slow down the sending process quite a bit!**.
+Set the onFailure and onSuccess values to true to receive an email notification that will give you insights into what it's doing.
+Tried our best to assemble all error and success messages throughout the process of sending an email, and it should give sufficient information to know what went wrong, if it failed.
+
+### Email Response
+
+Example of a successful email sent response to the notification email if ```onSuccess``` is true.
+```
+{
+  "success": [
+    "Valid Content",
+    "Authentication success",
+    "Emails accepted: [\"astt0003@stud.kea.dk\"]"
+  ],
+  "errors": [],
+  "sentEmails": [
+    {
+      "accepted": [
+        "astt0003@stud.kea.dk"
+      ],
+      "rejected": [],
+      "messageTime": 448,
+      "messageSize": 271
+    }
+  ]
+}
+```
 
 
 # Nice Logo path
