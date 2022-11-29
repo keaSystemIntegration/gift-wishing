@@ -57,7 +57,7 @@ ampq.connect(
                                     sftp.fastGet(
                                         `/upload/${dbFile.name}`,
                                         './sqlite/products.db'
-                                    )
+                                    ).then((_) => {})
                                 }
                             })
                     },
