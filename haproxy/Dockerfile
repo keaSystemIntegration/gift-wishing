@@ -1,3 +1,5 @@
-FROM haproxy:2.3
-COPY haproxy.cfg /usr/local/etc/haproxy/haproxy.cfg
-COPY authorization.lua /usr/local/etc/haproxy/authorization.lua
+FROM haproxytech/haproxy-ubuntu:2.6
+WORKDIR /usr/src
+COPY . .
+RUN sed -i -e 's/\r$//' /usr/src/install.sh
+RUN ./install.sh luaoauth

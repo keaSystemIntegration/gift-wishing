@@ -5,8 +5,8 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-const mongoURI = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}
-@gift-wish-auth.rpteshg.mongodb.net/${process.env.MONGO_DATABASE}?retryWrites=true&w=majority`;
+const mongoURI = `mongodb+srv://${process.env.AUTH_SERVICE_MONGO_USERNAME}:${process.env.MONGO_PASSWORD}
+@gift-wish-auth.rpteshg.mongodb.net/${process.AUTH_SERVICE_env.MONGO_DATABASE}?retryWrites=true&w=majority`;
 
 try {
   const connection = mongoose.connect(mongoURI, {

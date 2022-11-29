@@ -9,12 +9,10 @@ dotenv.config();
 const AuthUser = mongoose.model('AuthUser');
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.AUTH_SERVICE_JWT_SECRET;
 
 router.post('/signup', async (req, res) => {
-  const { email, name, username, password } = req.body;
-
-  console.log(JWT_SECRET);
+  const { email, name, username, password, inviteToken } = req.body;
 
   try {
     // const session = await mongoose.startSession();
@@ -31,36 +29,47 @@ router.post('/signup', async (req, res) => {
 
     console.log(authUser.email);
 
-    // call user api to add new user
-    // I suppose the url would be like this: proxy.domain.com/user/create
-    // ("user" is a flag to be used by the proxy to know what service to point to)
-    // ("create" is an example of an endpoint inside the user service)
-
-    // does the user service need the uuid from the authuser here?
-    const res = axios
-      .post('https://localhost:8000/user-service/user', {
-        userId: authUser._id.toString(),
-        email: user.email,
-        username: user.username,
-        name: authUser.name
-      })
-      .catch(async () => {
-        const result = await AuthUser.deleteOne({ email: authUser.email });
-        console.log(result);
-      });
-
-    // AuthUser.findById(authUser._id).then((doc) => {
-    //   doc.remove();
-    // });
-
-    // if (!res.data) {
-    // }
+    // integration team can perform sign up and friend invitation acceptance in the same way
+    // invitation requires a token to be sent
+    if (inviteToken) {
+      axios
+        .post('http://lb/user/invite/accept', {
+          token: inviteToken,
+          email: user.email,
+          username: user.username,
+          name: authUser.name
+        })
+        .then((response) => {
+          console.log(response.data);
+        })
+        .catch(async (error) => {
+          console.log(error);
+          const result = await AuthUser.deleteOne({ email: authUser.email });
+          console.log(result);
+        });
+    } else {
+      axios
+        .post('http://lb/user/user', {
+          userId: authUser._id.toString(),
+          email: user.email,
+          username: user.username,
+          name: authUser.name
+        })
+        .then((response) => {
+          console.log(response.data);
+        })
+        .catch(async (error) => {
+          console.log(error);
+          const result = await AuthUser.deleteOne({ email: authUser.email });
+          console.log(result);
+        });
+    }
 
     const token = jwt.sign(user, JWT_SECRET);
 
     console.log('Token:', token);
 
-    res.send({ token, user });
+    res.status(200).send({ token, user });
     // });
     // await session.endSession();
   } catch (e) {
@@ -87,7 +96,7 @@ router.post('/signin', async (req, res) => {
 
     console.log('Token:', token);
 
-    res.send({ token, user });
+    res.status(200).send({ token, user });
   } catch (e) {
     return res.status(401).send({ error: 'Invalid password or email' });
   }

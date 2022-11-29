@@ -19,8 +19,8 @@ app.use(authRoutes);
 // allows to create a cookie parser middleware
 // app.use(cookieParser());
 
-const mongoURI = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}
-@gift-wish-auth.rpteshg.mongodb.net/${process.env.MONGO_DATABASE}?retryWrites=true&w=majority`;
+const mongoURI = `mongodb+srv://${process.env.AUTH_SERVICE_MONGO_USERNAME}:${process.env.AUTH_SERVICE_MONGO_PASSWORD}
+@gift-wish-auth.rpteshg.mongodb.net/${process.env.AUTH_SERVICE_MONGO_DATABASE}?retryWrites=true&w=majority`;
 
 try {
   mongoose.connect(mongoURI, {
