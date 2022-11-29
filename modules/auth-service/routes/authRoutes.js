@@ -15,8 +15,6 @@ router.post('/signup', async (req, res) => {
   const { email, name, username, password, inviteToken } = req.body;
 
   try {
-    // const session = await mongoose.startSession();
-    // session.withTransaction(async () => {
     const authUser = new AuthUser({ email, password, username, name });
     await authUser.save();
 
@@ -33,7 +31,7 @@ router.post('/signup', async (req, res) => {
     // invitation requires a token to be sent
     if (inviteToken) {
       axios
-        .post('http://lb/user/invite/accept', {
+        .post('http://proxy/user/invite/accept', {
           token: inviteToken,
           email: user.email,
           username: user.username,
@@ -46,10 +44,11 @@ router.post('/signup', async (req, res) => {
           console.log(error);
           const result = await AuthUser.deleteOne({ email: authUser.email });
           console.log(result);
+          return res.status(500).send('Error in the User Service');
         });
     } else {
       axios
-        .post('http://lb/user/user', {
+        .post('http://proxy/user/user', {
           userId: authUser._id.toString(),
           email: user.email,
           username: user.username,
@@ -62,6 +61,7 @@ router.post('/signup', async (req, res) => {
           console.log(error);
           const result = await AuthUser.deleteOne({ email: authUser.email });
           console.log(result);
+          return res.status(500).send('Error in the User Service');
         });
     }
 
@@ -70,8 +70,6 @@ router.post('/signup', async (req, res) => {
     console.log('Token:', token);
 
     res.status(200).send({ token, user });
-    // });
-    // await session.endSession();
   } catch (e) {
     return res.status(422).send(e.message); // invalid data
   }
