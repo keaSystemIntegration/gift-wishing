@@ -1,22 +1,28 @@
 # How to
 
 ## _Local environment_
-In order to create the project on your local machine you will need to have docker.
+In order to create the project on your local machine you will need to have docker installed.
 You can find explanation on how to install docker here: https://docs.docker.com/get-docker/ .
 
-After you have installed docker, you will need to set up environment variable.  
+After you have installed docker, you will need to set up several environment variables.  
 To get the official env please contact us.
 
 After you set up the env, locate your terminal in the root directory and execute
 
 ```
-docker compose up
+docker-compose up
 ```
 
 ## Online Version
 
 This app can be found online at _________. 
-This version is host on azure. 
+This version is hosted on Microsoft Azure.
+
+# Proxy 
+Lorem ipsum
+
+# Auth
+Lorem ipsum
 
 # Products
 The products service is a service that expose for the user a graphql endpoint where it can fetch a list of products 
