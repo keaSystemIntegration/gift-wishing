@@ -205,7 +205,7 @@ This token must be added to the signup form as an input field (presumably hidden
 ```
 {
   userId?: string,
-	friendEmail: string
+  friendEmail: string
 }
 ```
 
