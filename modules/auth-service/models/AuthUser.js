@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
-import { cryptAsync } from '../utils/cryptPasword.js';
+import { cryptAsync, cryptSync } from '../utils/cryptPasword.js';
 
 const authUserSchema = new mongoose.Schema({
   email: {
@@ -20,19 +20,18 @@ const authUserSchema = new mongoose.Schema({
   }
 });
 
-authUserSchema.pre('save', function (next) {
-  const user = this;
+authUserSchema.pre('save', async function (next) {
+  let user = this;
   if (!user.isModified('password')) {
     return next;
   }
 
-  cryptAsync(user.password, (err, hash) => {
-    if (err) {
-      return next(err);
-    }
-    user.password = hash;
-    return next();
-  });
+  try {
+    user.password = await cryptSync(user.password);
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
 authUserSchema.methods.comparePassword = function (candidatePassword) {
