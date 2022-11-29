@@ -14,6 +14,10 @@ const JWT_SECRET = process.env.AUTH_SERVICE_JWT_SECRET;
 router.post('/signup', async (req, res) => {
   const { email, name, username, password, inviteToken } = req.body;
 
+  if (!email || !password || !username || !name) {
+    return res.status(422).send({ error: 'Must provide user details' });
+  }
+
   try {
     const authUser = new AuthUser({ email, password, username, name });
     await authUser.save();
@@ -25,71 +29,63 @@ router.post('/signup', async (req, res) => {
       username: authUser.username
     };
 
-    console.log(authUser.email);
-
     const token = jwt.sign(user, JWT_SECRET);
-    console.log('Token:', token);
 
     // integration team can perform sign up and friend invitation acceptance in the same way
-    // invitation requires a token to be sent
-    // try {
+    // invitation requires a token to be sent, however
     if (inviteToken) {
-      const response = await axios.post(
-        'http://proxy/user/invite/accept',
-        {
-          token: inviteToken,
-          email: user.email,
-          username: user.username,
-          name: authUser.name
-        },
-        {
-          headers: {
-            Authorization: 'Bearer ' + token
+      try {
+        const response = await axios.post(
+          'http://proxy/user/invite/accept',
+          {
+            token: inviteToken,
+            email: user.email,
+            username: user.username,
+            name: authUser.name
+          },
+          {
+            headers: {
+              Authorization: 'Bearer ' + token
+            }
           }
+        );
+
+        if (response.data) {
+          res.status(200).send({ token, user });
         }
-      );
-
-      console.log(response);
-
-      if (response.data) {
-        console.log(response.data);
-        await res.status(200).send({ token, user });
-      } else {
+      } catch (e) {
         const result = await AuthUser.deleteOne({ email: authUser.email });
         console.log(result);
+        return res.status(500).send('Error in the User Service', e.message);
       }
-
-      console.log(response.data);
-      await res.status(200).send({ token, user });
     } else {
-      const response = await axios.post(
-        'http://proxy/user/user',
-        {
-          userId: authUser._id.toString(),
-          email: user.email,
-          username: user.username,
-          name: authUser.name
-        },
-        {
-          headers: {
-            Authorization: 'Bearer ' + token
+      try {
+        const response = await axios.post(
+          'http://proxy/user/user',
+          {
+            userId: authUser._id.toString(),
+            email: user.email,
+            username: user.username,
+            name: authUser.name
+          },
+          {
+            headers: {
+              Authorization: 'Bearer ' + token
+            }
           }
+        );
+
+        if (response.data) {
+          res.status(200).send({ token, user });
         }
-      );
-
-      console.log(response);
-      console.log('DATA', response.data);
-
-      if (response.data) {
-        console.log(response.data);
-        await res.status(200).send({ token, user });
-      } else {
+      } catch (e) {
         const result = await AuthUser.deleteOne({ email: authUser.email });
         console.log(result);
+        return res.status(500).send({ error: 'Error in User Service: ' + e.message });
       }
     }
   } catch (e) {
-    res.status(401).send(e.message);
+    res.status(500).send({ error: e.message });
   }
 });
 
