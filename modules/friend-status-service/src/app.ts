@@ -3,23 +3,24 @@ import http from "http";
 import dotenv from "dotenv";
 import cors from "cors";
 import { Server, Socket } from "socket.io";
+import cookieParser from 'cookie-parser';
 
 const app = express();
 const server = http.createServer(app);
 
 // app.use(express.static("public"));
 app.use(cors());
+app.use(cookieParser());
 
 dotenv.config();
 
 interface IFriend {
   username: string,
   userId: string,
-  status: string
+  status?: string
 };
 
-interface IUserAndFriendsList {
-  userId: string,
+interface IFriendsList {
   friendsList: IFriend[]
 };
 
@@ -29,19 +30,18 @@ interface ServerToClientEvents {
 };
 
 interface ClientToServerEvents {
-  user_connected: (userAndFriendsList: IUserAndFriendsList) => void
+  user_connected: (friendsList: IFriendsList) => void
 };
 
 const io = new Server<ClientToServerEvents, ServerToClientEvents> (server, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
+    origin: "*"
   }
 });
 
-function getFriendsStatusAndNotifyFriends(USER_SOCKET_ROOM: string, FRIENDS_LIST: IFriend[], socket: Socket) {
+function getFriendsStatusAndNotifyFriends(USER_SOCKET_ROOM: string, FRIENDS_LIST: any[], socket: Socket) {
   if ( FRIENDS_LIST.length ) {
-    FRIENDS_LIST.forEach(friend => {
+    FRIENDS_LIST.forEach( (friend: any) => {
       // get friend's socket room
       const friendSocketRoom = friend.userId;
   
@@ -67,27 +67,30 @@ function getFriendsStatusAndNotifyFriends(USER_SOCKET_ROOM: string, FRIENDS_LIST
 
 io.on("connection", (socket: Socket) => {
   // console.log('\n\n=========NEW CONNECTION==========')
+  // console.log('HEADER', socket.handshake.headers);
   let USER_SOCKET_ROOM = '';
-  let FRIENDS_LIST: Array<IFriend> = [];
+  let FRIENDS_LIST: any = [];
 
-  socket.on("user_connected", (userAndFriendsList: IUserAndFriendsList) => {
-    USER_SOCKET_ROOM = userAndFriendsList.userId;
-    FRIENDS_LIST = userAndFriendsList.friendsList;
+  socket.on("user_connected", ({friendsList}: IFriendsList) => {    
 
-    //the user creates an unique room number based on UUID sent from database which
-    // is joined by each separate connection of the same user
+    const { userId, email } = JSON.parse(socket.handshake.headers.cookie?.split('=')[1] || '{}');
+    
+    USER_SOCKET_ROOM = userId;
+    FRIENDS_LIST = friendsList || [];
+
+    //the user creates an unique socket room based on userId received from cookies claims which
+    // is joined by each separate connection of the user
     socket.join(USER_SOCKET_ROOM)
-    // console.log('rooms', io.sockets.adapter.rooms)
 
     // get list of friends with statuses and notify active friends that the user is online
-    const friendsList = getFriendsStatusAndNotifyFriends(USER_SOCKET_ROOM, FRIENDS_LIST, socket);
-    // emit to user the list of friends with statuses
-    socket.emit("friends_status", friendsList);
+    const friendsWithStatusList = getFriendsStatusAndNotifyFriends(USER_SOCKET_ROOM, FRIENDS_LIST, socket);
+    // emit to user the list of friends with their statuses
+    socket.emit("friends_status", friendsWithStatusList);
   });
 
   socket.on("disconnect", () => {
-    if (FRIENDS_LIST.length) {
-      FRIENDS_LIST.forEach(friend => {
+    if (FRIENDS_LIST && FRIENDS_LIST.length) {
+      FRIENDS_LIST.forEach( (friend:any) => {
         // get friend's socket room
         const friendSocketRoom = friend.userId;
       
@@ -102,7 +105,7 @@ io.on("connection", (socket: Socket) => {
       // console.log('on_disconnection', io.sockets.adapter.rooms)
     }
   });
-})
+});
 
 // Development purposes
 app.get('/', (req, res) => {
@@ -112,5 +115,5 @@ app.get('/', (req, res) => {
 const PORT = process.env.FRIEND_STATUS_SERVICE_PORT || 8080;
 server.listen(PORT, () => {
   console.log(`FRIEND STATUS server is running on PORT: ${PORT}`);
-})
+});
 
