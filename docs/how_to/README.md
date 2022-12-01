@@ -645,6 +645,8 @@ Event ```update_user_status```
 }
 ```
 
+("../")
+![products vs sftp relation](../overview_of_the_system/products-sftp-diagram.png)
 
 # Nice Logo path
 The service is providing a logo which is hosted on azure cdn. The address to logo is https://giftwishinglogo.blob.core.windows.net/newcontainer/Smile.svg.png
