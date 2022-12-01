@@ -465,6 +465,122 @@ Example of a successful email sent response to the notification email if ```onSu
 ```
 
 # Wishlist Service
+All the routes require an "Authentication" token in request headers in order to response.
+
+## Models
+Models are used to for output or input information of the API calls for this service.
+
+### Wishlist
+``` 
+{
+  userId: String,
+  products?: Product[]
+}
+```
+
+### Product (Not finished)
+```
+{
+  name: String,
+  url: String
+}
+```
+
+
+##Routes
+### Oveview
+```/wishlist/all``` @[GET]
+```/wishlist/friends``` @[GET]
+```/wishlist``` @[GET]
+```/wishlist``` @[PATCH]
+```/wishlist``` @[DELETE]
+
+#### Endpoints:
+
+##### Get all wishlists
+```/wishlist/all``` @[GET]
+
+**Input:**
+```empty```
+
+**Output:** 
+```
+Wishlist[]
+```
+
+#### Get wishlists based on list of id's
+```/wishlist/friends``` @[GET]
+
+**Input:**
+```
+{
+  "friendsList": userId[]
+}
+```
+
+**Output:** 
+```
+Wishlist[]
+```
+
+#### Get wishlist (create one if it doesn't exist)
+This endpoint has a double responsiblity. The servser will initially check if the wishlist exists. If it doesn't, then it will create a new wishlist, otherwise it will return the existing one. 
+```/wishlist``` @[GET]
+
+**Input**
+```empty```
+
+**Output** (if user is new)
+```
+{
+  "message": String,
+  "wishlist": Wishlist
+}
+```
+
+**Output** (if user exists)
+```
+Wishlist[]
+```
+
+#### Patch wishlist with products
+```/wishlist``` @[PATCH]
+
+**Input**
+```
+{
+  "products": Product[]
+}
+```
+
+**Output** 
+```
+{
+  "userId": String,
+  "products": Product[]
+}
+```
+
+#### Delete wishlist
+```/wishlist``` @[DELETE]
+
+**Input**
+```empty```
+
+
+**Output** 
+```
+{
+  "message": String
+}
+```
+
+
+
+
+
+
+
 
 # Nice Logo path
 The service is providing a logo which is hosted on azure cdn. The address to logo is https://giftwishinglogo.blob.core.windows.net/newcontainer/Smile.svg.png
