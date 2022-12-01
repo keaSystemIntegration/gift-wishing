@@ -464,6 +464,7 @@ Example of a successful email sent response to the notification email if ```onSu
 }
 ```
 
+# Wishlist Service
 
 # Nice Logo path
 The service is providing a logo which is hosted on azure cdn. The address to logo is https://giftwishinglogo.blob.core.windows.net/newcontainer/Smile.svg.png
