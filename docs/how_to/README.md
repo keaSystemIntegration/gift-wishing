@@ -612,8 +612,11 @@ Models are used to for output or input information of the socket events for this
 ## Events
 
 ### Oveview
+
 ## Client to Server events:
-```user_connected```
+
+Event ```user_connected```
+
 **Parameter**
 ```
 {
@@ -622,13 +625,16 @@ Models are used to for output or input information of the socket events for this
 ```
 
 ## Server to Client events:
-```friends_status```
+
+Event ```friends_status```
+
 **Parameter**
 ```
 FriendWithStatus[]
 ```
 
-```update_user_status```
+Event ```update_user_status```
+
 **Parameter 1**
 ```
 {
