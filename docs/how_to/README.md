@@ -582,11 +582,65 @@ Wishlist[]
 }
 ```
 
+# Friend Status Service
+This service has been implemented to offer the users the possibility to display the social statuses of their friends in real time without reloading the page.
+The server is implemented with Socket.io library, so the communication is done through the WebSocket protocol with polling as a fallback option.
+All the events require an "Authentication" token in request headers in order to response. Once the user is authorized, they will have an userId in the socket cookies claims which will be used by the socket server.
 
 
+## Models
+Models are used to for output or input information of the socket events for this service.
+
+### Friend
+```
+{
+  "username": String,
+  "userId": String
+}
+```
+
+### FriendWithStatus
+```
+{
+  "username": String,
+  "userId": String,
+  "status": String
+}
+```
 
 
+## Events
 
+### Oveview
+## Client to Server events:
+```user_connected```
+**Parameter**
+```
+{
+  "friendsList": Friend[]
+}
+```
+
+## Server to Client events:
+```friends_status```
+**Parameter**
+```
+FriendWithStatus[]
+```
+
+```update_user_status```
+**Parameter 1**
+```
+{
+  "userId": String,
+}
+```
+**Parameter 2**
+```
+{
+  "status": String
+}
+```
 
 
 # Nice Logo path
