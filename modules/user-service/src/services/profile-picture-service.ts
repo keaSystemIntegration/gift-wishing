@@ -36,8 +36,10 @@ export const azureDelete = async (username: string) => {
 
 export const imageExists = async (username: string) => {
 	try {
-		return azureFetch(username);
+		const image = await azureFetch(username);
+		return image;
 	} catch (err) {
+		console.log("Error in image Exists: " + err)
 		return false;
 	}
 }
@@ -46,24 +48,33 @@ export const imageExists = async (username: string) => {
 export const updateProfilePictureName = async (oldUsername: string, newUsername: string) => {
 
 	try {
+		console.log("Updating profile picture name from: " + oldUsername + " to: " + newUsername);
 		const newImageExists = imageExists(newUsername);
-		const image = azureFetch(oldUsername);
+		const image = imageExists(oldUsername);
 
-		if (await newImageExists) {
+		if (await newImageExists !== false) {
+			console.log("image with new username already exists!");
 			throw new Error("image with new username already exists!");
 		} 
 
-		if(!image) return {succeeded: true}; // User doens't have image, no need to update
+		if(await image === false) return {succeeded: true}; // User doens't have image, no need to update
 
 		const uploadSuccess = await azureUpload(await image, newUsername);
 		if(!uploadSuccess){
+			console.log("Couldn't upload profile picture with new username " + newUsername);
 			throw new Error("Couldn't upload profile picture with new username " + newUsername);
 		}
+
 		const deleteOldImage = await azureDelete(oldUsername);
 		if(deleteOldImage.succeeded === false){
 			console.log("[WARN]: Couldn't delete old username profile picture");
+			const deleteNewImage = await azureDelete(newUsername);
+			if(deleteNewImage.succeeded === false){
+				console.log("[WARN]: Couldn't delete new profile picture and weren't able to delete old profile picture\nTwo profile pictures exist");
+				return {succeeded: true};
+			}
 		}
-
+		
 		return {succeeded: deleteOldImage.succeeded === true && uploadSuccess === UPLOAD_SUCCESS}
 
 	} catch (err) {

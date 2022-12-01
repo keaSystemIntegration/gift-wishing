@@ -15,8 +15,6 @@ services:
             - JWT_SECRET=${AUTH_SERVICE_JWT_SECRET}
         restart: on-failure
 
-    restart: on-failure
-
     rabbitmq-server:
         image: giftwishingwe.azurecr.io/rabbitmq-server
         container_name: rabbitmq-server
@@ -29,128 +27,105 @@ services:
         environment:
             - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
 
-  redis-service:
-    container_name: redis-server
-    image: giftwishingwe.azurecr.io/redis-server
-    build:
-      context: ./modules/redis-service
-      dockerfile: Dockerfile
-    restart: on-failure
+    redis-service:
+      container_name: redis-server
+      image: giftwishingwe.azurecr.io/redis-server
+      build:
+        context: ./modules/redis-service
+        dockerfile: Dockerfile
+      restart: on-failure
 
     sftp-service:
-        image: giftwishingwe.azurecr.io/sftp-service
-        deploy:
-            resources:
-                limits:
-                    cpus: '0.50'
-                    memory: '512M'
-        ports:
-            - '22:22'
-        container_name: sftp-service
-        build: ./modules/sftp-service
-        volumes:
-            - sftp-upload:/home/$SFTP_USER/upload
-        environment:
-            - SFTP_USER=$SFTP_USER
-            - QUEUE_ENDPOINT=$QUEUE_ENDPOINT
-            - RABBITMQ_SERVER=$RABBITMQ_SERVER
-            - RABBITMQ_USER=$RABBITMQ_USER
-            - RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD
-        depends_on:
-            - rabbitmq-server
+      image: giftwishingwe.azurecr.io/sftp-service
+      deploy:
+        resources:
+          limits:
+            cpus: "0.50"
+            memory: "512M"
+      container_name: sftp-service
+      build:
+        context: ./modules/sftp-service
+        dockerfile: ./Dockerfile
+        args:
+          - SFTP_SERVICE_USERNAME=$SFTP_SERVICE_USERNAME
+          - SFTP_SERVICE_PASSWORD=$SFTP_SERVICE_PASSWORD
+      volumes:
+        - sftp-upload:/home/$SFTP_SERVICE_USERNAME/upload
+      environment:
+        - SFTP_SERVICE_USERNAME=$SFTP_SERVICE_USERNAME
+        - RABBITMQ_SERVICE_HOST=$RABBITMQ_SERVICE_HOST
+        - RABBITMQ_SERVICE_USER=$RABBITMQ_SERVICE_USER
+        - RABBITMQ_SERVICE_PASSWORD=$RABBITMQ_SERVICE_PASSWORD
+      depends_on:
+        - rabbitmq-server
 
-  sftp-service:
-    image: giftwishingwe.azurecr.io/sftp-service
-    deploy:
-      resources:
-        limits:
-          cpus: "0.50"
-          memory: "512M"
-    ports:
-      - "22:22"
-    container_name: sftp-service
-    build:
-      context: ./modules/sftp-service
-      dockerfile: ./Dockerfile
-      args:
+    products-service:
+      image: giftwishingwe.azurecr.io/products-service
+      deploy:
+        resources:
+          limits:
+            cpus: "0.50"
+            memory: "512M"
+      build: ./modules/products-service
+      container_name: products-service
+      ports:
+        - "8005:8005"
+      environment:
+        - PORT=8005
+        - PRODUCTS_SERVICE_DATABASE_URL=$PRODUCTS_SERVICE_DATABASE_URL
+        - SFTP_SERVICE_URL=$SFTP_SERVICE_URL
         - SFTP_SERVICE_USERNAME=$SFTP_SERVICE_USERNAME
         - SFTP_SERVICE_PASSWORD=$SFTP_SERVICE_PASSWORD
-    volumes:
-      - sftp-upload:/home/$SFTP_SERVICE_USERNAME/upload
-    environment:
-      - SFTP_SERVICE_USERNAME=$SFTP_SERVICE_USERNAME
-      - RABBITMQ_SERVICE_HOST=$RABBITMQ_SERVICE_HOST
-      - RABBITMQ_SERVICE_USER=$RABBITMQ_SERVICE_USER
-      - RABBITMQ_SERVICE_PASSWORD=$RABBITMQ_SERVICE_PASSWORD
-    depends_on:
-      - rabbitmq-server
+        - RABBITMQ_SERVICE_HOST=$RABBITMQ_SERVICE_HOST
+        - RABBITMQ_SERVICE_USER=$RABBITMQ_SERVICE_USER
+        - RABBITMQ_SERVICE_PASSWORD=$RABBITMQ_SERVICE_PASSWORD
+        - PRODUCTS_SERVICE_REDIS_URL=$PRODUCTS_SERVICE_REDIS_URL
 
-  products-service:
-    image: giftwishingwe.azurecr.io/products-service
-    deploy:
-      resources:
-        limits:
-          cpus: "0.50"
-          memory: "512M"
-    build: ./modules/products-service
-    container_name: products-service
-    ports:
-      - "8005:8005"
-    environment:
-      - PORT=8005
-      - PRODUCTS_SERVICE_DATABASE_URL=$PRODUCTS_SERVICE_DATABASE_URL
-      - SFTP_SERVICE_URL=$SFTP_SERVICE_URL
-      - SFTP_SERVICE_USERNAME=$SFTP_SERVICE_USERNAME
-      - SFTP_SERVICE_PASSWORD=$SFTP_SERVICE_PASSWORD
-      - RABBITMQ_SERVICE_HOST=$RABBITMQ_SERVICE_HOST
-      - RABBITMQ_SERVICE_USER=$RABBITMQ_SERVICE_USER
-      - RABBITMQ_SERVICE_PASSWORD=$RABBITMQ_SERVICE_PASSWORD
-      - PRODUCTS_SERVICE_REDIS_URL=$PRODUCTS_SERVICE_REDIS_URL
+      restart: on-failure #TODO: find a better solution for timing the docker image
+      depends_on:
+        - sftp-service
+        - rabbitmq-server
 
-    restart: on-failure #TODO: find a better solution for timing the docker image
-    depends_on:
-      - sftp-service
-      - rabbitmq-server
+    user-service:
+      image: giftwishingwe.azurecr.io/user-service
+      deploy:
+        resources:
+          limits:
+            cpus: "0.50"
+            memory: "512M"
+      build:
+        context: ./modules/user-service
+        target: production
+      environment:
+        - NODE_ENV=production
+        - USER_SERVICE_PORT=${USER_SERVICE_PORT}
+        - USER_SERVICE_NEO4J_URL=${USER_SERVICE_NEO4J_URL}
+        - USER_SERVICE_NEO4J_USERNAME=${USER_SERVICE_NEO4J_USERNAME}
+        - USER_SERVICE_NEO4J_PASSWORD=${USER_SERVICE_NEO4J_PASSWORD}
+        - USER_SERVICE_AURA_INSTANCENAME=${USER_SERVICE_AURA_INSTANCENAME}
+        - USER_SERVICE_JWT_SECRET=${USER_SERVICE_JWT_SECRET}
+        - USER_SERVICE_SIGNUP_URL=${USER_SERVICE_SIGNUP_URL}
+        - EMAIL_SERVER_URL_LOCAL=${EMAIL_SERVER_URL_LOCAL}
+        - EMAIL_SERVER_URL_PROD=${EMAIL_SERVER_URL_PROD}
+        - EMAIL_SERVER_ACCESS_TOKEN=${EMAIL_SERVER_ACCESS_TOKEN}
+        - EMAIL_SERVER_SENDER_EMAIL=${EMAIL_SERVER_SENDER_EMAIL}
+        - EMAIL_SERVER_SENDER_PASSWORD=${EMAIL_SERVER_SENDER_PASSWORD}
+        - EMAIL_SERVER_SENDER_PASSWORD=${EMAIL_SERVER_SENDER_PASSWORD}
 
-  user-service:
-    image: giftwishingwe.azurecr.io/user-service
-    deploy:
-      resources:
-        limits:
-          cpus: "0.50"
-          memory: "512M"
-    build:
-      context: ./modules/user-service
-      target: production
-    environment:
-      - NODE_ENV=production
-      - USER_SERVICE_PORT=${USER_SERVICE_PORT}
-      - USER_SERVICE_NEO4J_URL=${USER_SERVICE_NEO4J_URL}
-      - USER_SERVICE_NEO4J_USERNAME=${USER_SERVICE_NEO4J_USERNAME}
-      - USER_SERVICE_NEO4J_PASSWORD=${USER_SERVICE_NEO4J_PASSWORD}
-      - USER_SERVICE_AURA_INSTANCENAME=${USER_SERVICE_AURA_INSTANCENAME}
-      - USER_SERVICE_JWT_SECRET=${USER_SERVICE_JWT_SECRET}
-      - USER_SERVICE_SIGNUP_URL=${USER_SERVICE_SIGNUP_URL}
-      - EMAIL_SERVER_URL_LOCAL=${EMAIL_SERVER_URL_LOCAL}
-      - EMAIL_SERVER_URL_PROD=${EMAIL_SERVER_URL_PROD}
-      - EMAIL_SERVER_ACCESS_TOKEN=${EMAIL_SERVER_ACCESS_TOKEN}
-      - EMAIL_SERVER_SENDER_EMAIL=${EMAIL_SERVER_SENDER_EMAIL}
-      - EMAIL_SERVER_SENDER_PASSWORD=${EMAIL_SERVER_SENDER_PASSWORD}
-      - EMAIL_SERVER_SENDER_PASSWORD=${EMAIL_SERVER_SENDER_PASSWORD}
     auth-service:
-        image: giftwishingwe.azurecr.io/auth-service
-        deploy:
-            resources:
-                limits:
-                    cpus: '0.50'
-                    memory: '512M'
-        build: ./modules/auth-service
-        environment:
-            - APPID=4500
-            - AUTH_SERVICE_MONGO_USERNAME=${AUTH_SERVICE_MONGO_USERNAME}
-            - AUTH_SERVICE_MONGO_PASSWORD=${AUTH_SERVICE_MONGO_PASSWORD}
-            - AUTH_SERVICE_MONGO_DATABASE=${AUTH_SERVICE_MONGO_DATABASE}
-            - AUTH_SERVICE_JWT_SECRET=${AUTH_SERVICE_JWT_SECRET}
+      image: giftwishingwe.azurecr.io/auth-service
+      deploy:
+        resources:
+          limits:
+            cpus: '0.50'
+            memory: '512M'
+      build: ./modules/auth-service
+      environment:
+        - APPID=4500
+        - AUTH_SERVICE_MONGO_USERNAME=${AUTH_SERVICE_MONGO_USERNAME}
+        - AUTH_SERVICE_MONGO_PASSWORD=${AUTH_SERVICE_MONGO_PASSWORD}
+        - AUTH_SERVICE_MONGO_DATABASE=${AUTH_SERVICE_MONGO_DATABASE}
+        - AUTH_SERVICE_JWT_SECRET=${AUTH_SERVICE_JWT_SECRET}
 
 volumes:
     sftp-upload:

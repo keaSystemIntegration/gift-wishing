@@ -1,13 +1,15 @@
 # How to
 
 ## _Local environment_
-In order to create the project on your local machine you will need to have docker installed.
+In order to create the project on your local machine you will need to have docker.
 You can find explanation on how to install docker here: https://docs.docker.com/get-docker/ .
 
-After you have installed docker, you will need to set up several environment variables.  
+After you have installed docker, you will need to set up environment variable.  
 To get the official env please contact us.
 
 After you set up the env, locate your terminal in the root directory and execute
+
+**NOTE:** If you're using an ARM architecture machine, for example an M1 macbook, you have to change the dockerfile in products to be node:18 instead of node:18-alpine.
 
 ```
 docker-compose up
@@ -31,7 +33,7 @@ Lorem ipsum
 # Products
 The products service is a service that expose for the user a graphql endpoint where it can fetch a list of products 
 or a single product by id. 
-After initialising the app the documentation for the graphql server can be found in http://{endpoint}/products
+After initialising the app the documentation for the graphql server can be found in http://$endpoint/products
 
 The products are stored in a single table in the sql server. the structure is as following 
 
@@ -56,11 +58,10 @@ The products service is using redis to store you most recent results for any req
 and products. The cache has time to live of 60 seconds
 
 # SFTP
-In the application you will find sftp server that runs on port 22 (sftp:$user:password@$endpoint) the credentials can be found in the .env. 
+In the application you will find sftp server that runs on port 22 (sftp://$user:$password@$endpoint) the credentials can be found in the .env. 
 It can be accessed with any sftp client (fx: [Cyberduck](https://cyberduck.io/), [FileZilla](https://filezilla-project.org/))
 After accessing the server you can view or replace the products.db. Please note that you should follow the schema as 
 described at the products section, or communicate with the development team if needed.
-
 
 ![products vs sftp relation](../overview_of_the_system/products-sftp-diagram.png)
 
@@ -400,8 +401,8 @@ Get user with all their friends.
 Email server is currently deployed to Azure, part of a function application.
 No integration is needed on this part of the application, however if something is not working and you want to rule it out as the culprit...
 
-Email Server link: https://wishlist-email-service.azurewebsites.net/api/Email-Service-HTTP?code=```EMAIL_SERVER_URL_PROD```
-The value for ```EMAIL_SERVER_URL_PROD``` can be found in the environment variables.
+Email Server link: ```EMAIL_SERVER_URL_PROD```?code=```EMAIL_SERVER_ACCESS_TOKEN```
+The value for ```EMAIL_SERVER_URL_PROD``` and ```EMAIL_SERVER_ACCESS_TOKEN``` can be found in the environment variables.
 ### Sending an email
 Example request
 ```
@@ -410,13 +411,13 @@ Example request
     "email": "wishlist.mail.sender@gmail.com"
   },
   "email": {
-    "to": "astt0003@stud.kea.dk",
+    "to": "someemail@gmail.com",
     "subject": "Subject check",
     "html": "<p>something cool</p>",
     "text": ""
   },
   "notification": {
-    "email": "a.bragason@gmail.com",
+    "email": "somenotification@gmail.com",
     "onFailure": true,
     "onSuccess": true
   }
@@ -447,13 +448,13 @@ Example of a successful email sent response to the notification email if ```onSu
   "success": [
     "Valid Content",
     "Authentication success",
-    "Emails accepted: [\"astt0003@stud.kea.dk\"]"
+    "Emails accepted: [\"someemail@gmail.com\"]"
   ],
   "errors": [],
   "sentEmails": [
     {
       "accepted": [
-        "astt0003@stud.kea.dk"
+        "someemail@gmail.com"
       ],
       "rejected": [],
       "messageTime": 448,
@@ -465,7 +466,7 @@ Example of a successful email sent response to the notification email if ```onSu
 
 
 # Nice Logo path
-The service is providing a logo which is hosted on azure cdn you can get the url for accessing the cdn through the development team
+The service is providing a logo which is hosted on azure cdn. The address to logo is https://giftwishinglogo.blob.core.windows.net/newcontainer/Smile.svg.png
 
 # Environment Variables
 Here you can see all the required envs, to get the access to them please contact the development team
