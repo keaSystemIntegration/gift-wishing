@@ -645,6 +645,7 @@ Event ```update_user_status```
 }
 ```
 
+This is a diagram which represents the flow of events
 ![friend status flow of events](../overview_of_the_system/Friend-Status-Flow-of-Events.png)
 
 # Nice Logo path
