@@ -401,8 +401,8 @@ Get user with all their friends.
 Email server is currently deployed to Azure, part of a function application.
 No integration is needed on this part of the application, however if something is not working and you want to rule it out as the culprit...
 
-Email Server link: https://wishlist-email-service.azurewebsites.net/api/Email-Service-HTTP?code=```EMAIL_SERVER_URL_PROD```
-The value for ```EMAIL_SERVER_URL_PROD``` can be found in the environment variables.
+Email Server link: ```EMAIL_SERVER_URL_PROD```?code=```EMAIL_SERVER_URL_PROD```
+The value for ```EMAIL_SERVER_URL_PROD``` and ```EMAIL_SERVER_URL_PROD``` can be found in the environment variables.
 ### Sending an email
 Example request
 ```
