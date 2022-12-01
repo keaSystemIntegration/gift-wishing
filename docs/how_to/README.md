@@ -465,7 +465,7 @@ Example of a successful email sent response to the notification email if ```onSu
 ```
 
 # Wishlist Service
-All the routes require an "Authentication" token in request headers in order to response.
+All the routes require an "Authentication" token in request headers in order to response. Once the user is authorized, they will have an userId in the request cookies claims which will be used to verify the identity of the user in the routes. This way, the client is not responsible to send the userId explicitly anymore.
 
 ## Models
 Models are used to for output or input information of the API calls for this service.
@@ -531,7 +531,7 @@ Wishlist[]
 ```
 
 #### Get wishlist (create one if it doesn't exist)
-This endpoint has a double responsiblity. The servser will initially check if the wishlist exists. If it doesn't, then it will create a new wishlist, otherwise it will return the existing one. 
+This endpoint has a double responsiblity. The server will initially check if the wishlist exists. If it doesn't, then it will create a new wishlist, otherwise it will return the existing one. 
 ```/wishlist``` @[GET]
 
 **Input**
