@@ -608,12 +608,9 @@ Models are used to for output or input information of the socket events for this
 }
 ```
 
-
 ## Events
 
-### Oveview
-
-## Client to Server events:
+### Client to Server events:
 
 Event ```user_connected```
 
@@ -624,7 +621,7 @@ Event ```user_connected```
 }
 ```
 
-## Server to Client events:
+### Server to Client events:
 
 Event ```friends_status```
 
