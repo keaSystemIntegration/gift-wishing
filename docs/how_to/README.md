@@ -487,12 +487,19 @@ Models are used to for output or input information of the API calls for this ser
 ```
 
 
-##Routes
+## Routes
+
+**ROOT:** /wishlist
+
 ### Oveview
 ```/wishlist/all``` @[GET]
+
 ```/wishlist/friends``` @[GET]
+
 ```/wishlist``` @[GET]
+
 ```/wishlist``` @[PATCH]
+
 ```/wishlist``` @[DELETE]
 
 #### Endpoints:
