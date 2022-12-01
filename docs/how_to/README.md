@@ -486,6 +486,189 @@ Example of a successful email sent response to the notification email if ```onSu
 }
 ```
 
+# Wishlist Service
+All the routes require an "Authentication" token in request headers in order to response. Once the user is authorized, they will have an userId in the request cookies claims which will be used to verify the identity of the user in the routes. This way, the client is not responsible to send the userId explicitly anymore.
+
+## Models
+Models are used to for output or input information of the API calls for this service.
+
+### Wishlist
+``` 
+{
+  userId: String,
+  products?: Product[]
+}
+```
+
+### Product (Not finished)
+```
+{
+  name: String,
+  url: String
+}
+```
+
+
+## Routes
+
+**ROOT:** /wishlist
+
+### Oveview
+```/wishlist/all``` @[GET]
+
+```/wishlist/friends``` @[GET]
+
+```/wishlist``` @[GET]
+
+```/wishlist``` @[PATCH]
+
+```/wishlist``` @[DELETE]
+
+#### Endpoints:
+
+##### Get all wishlists
+```/wishlist/all``` @[GET]
+
+**Input:**
+```empty```
+
+**Output:** 
+```
+Wishlist[]
+```
+
+#### Get wishlists based on list of id's
+```/wishlist/friends``` @[GET]
+
+**Input:**
+```
+{
+  "friendsList": userId[]
+}
+```
+
+**Output:** 
+```
+Wishlist[]
+```
+
+#### Get wishlist (create one if it doesn't exist)
+This endpoint has a double responsiblity. The server will initially check if the wishlist exists. If it doesn't, then it will create a new wishlist, otherwise it will return the existing one. 
+```/wishlist``` @[GET]
+
+**Input**
+```empty```
+
+**Output** (if user is new)
+```
+{
+  "message": String,
+  "wishlist": Wishlist
+}
+```
+
+**Output** (if user exists)
+```
+Wishlist[]
+```
+
+#### Patch wishlist with products
+```/wishlist``` @[PATCH]
+
+**Input**
+```
+{
+  "products": Product[]
+}
+```
+
+**Output** 
+```
+{
+  "userId": String,
+  "products": Product[]
+}
+```
+
+#### Delete wishlist
+```/wishlist``` @[DELETE]
+
+**Input**
+```empty```
+
+
+**Output** 
+```
+{
+  "message": String
+}
+```
+
+# Friend Status Service
+This service has been implemented to offer the users the possibility to display the social statuses of their friends in real time without reloading the page.
+The server is implemented with Socket.io library, so the communication is done through the WebSocket protocol with polling as a fallback option.
+All the events require an "Authentication" token in request headers in order to response. Once the user is authorized, they will have an userId in the socket cookies claims which will be used by the socket server.
+
+
+## Models
+Models are used to for output or input information of the socket events for this service.
+
+### Friend
+```
+{
+  "username": String,
+  "userId": String
+}
+```
+
+### FriendWithStatus
+```
+{
+  "username": String,
+  "userId": String,
+  "status": String
+}
+```
+
+## Events
+
+### Client to Server events:
+
+Event ```user_connected```
+
+**Argument**
+```
+{
+  "friendsList": Friend[]
+}
+```
+
+### Server to Client events:
+
+Event ```friends_status```
+
+**Argument**
+```
+FriendWithStatus[]
+```
+
+Event ```update_user_status```
+
+**Argument 1**
+```
+{
+  "userId": String,
+}
+```
+**Argument 2**
+```
+{
+  "status": String
+}
+```
+
+This is a diagram which represents the flow of events
+![friend status flow of events](../overview_of_the_system/Friend-Status-Flow-of-Events.png)
 
 # Nice Logo path
 The service is providing a logo which is hosted on azure cdn. The address to logo is https://giftwishinglogo.blob.core.windows.net/newcontainer/Smile.svg.png
