@@ -9,6 +9,8 @@ To get the official env please contact us.
 
 After you set up the env, locate your terminal in the root directory and execute
 
+**NOTE:** If you're using an ARM architecture machine, for example an M1 macbook, you have to change the dockerfile in products to be node:18 instead of node:18-alpine.
+
 ```
 docker-compose up
 ```
@@ -410,13 +412,13 @@ Example request
     "email": "wishlist.mail.sender@gmail.com"
   },
   "email": {
-    "to": "astt0003@stud.kea.dk",
+    "to": "someemail@gmail.com",
     "subject": "Subject check",
     "html": "<p>something cool</p>",
     "text": ""
   },
   "notification": {
-    "email": "a.bragason@gmail.com",
+    "email": "somenotification@gmail.com",
     "onFailure": true,
     "onSuccess": true
   }
@@ -447,13 +449,13 @@ Example of a successful email sent response to the notification email if ```onSu
   "success": [
     "Valid Content",
     "Authentication success",
-    "Emails accepted: [\"astt0003@stud.kea.dk\"]"
+    "Emails accepted: [\"someemail@gmail.com\"]"
   ],
   "errors": [],
   "sentEmails": [
     {
       "accepted": [
-        "astt0003@stud.kea.dk"
+        "someemail@gmail.com"
       ],
       "rejected": [],
       "messageTime": 448,

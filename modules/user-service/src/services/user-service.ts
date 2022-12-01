@@ -2,6 +2,7 @@ import User from "../models/User";
 import { userRepository } from "../repositories/user-repository";
 import { isEmail } from "../validation/input-validation";
 import { friendService } from "./friend-service";
+import { updateProfilePictureName } from "./profile-picture-service";
 
 export const userService = {
 	async getUserById(userId: string): Promise<User | null> {
@@ -36,6 +37,15 @@ export const userService = {
 		if(!userId){
       return null;
     }
+		if(username){
+			const user = await userService.getUserById(userId);
+			if(username !== user.username){
+				const updated = await updateProfilePictureName(user.username, username);
+				if(updated.succeeded === false){
+					throw new Error("Couldn't update profile picture for the user");
+				}
+			}
+		}
 		return userRepository.updateUser(userId, name, username);
 	},
 	async deleteUser(userId: string): Promise<User | null> {
