@@ -645,7 +645,7 @@ Event ```update_user_status```
 }
 ```
 
-![friend status flow of events](../overview_of_the_system/Friend-Status Flow-of-Events.png)
+![friend status flow of events](../overview_of_the_system/Friend-Status-Flow-of-Events.png)
 
 # Nice Logo path
 The service is providing a logo which is hosted on azure cdn. The address to logo is https://giftwishinglogo.blob.core.windows.net/newcontainer/Smile.svg.png
