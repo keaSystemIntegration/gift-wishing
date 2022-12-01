@@ -25,7 +25,29 @@ This app can be found online at _________.
 This version is hosted on Microsoft Azure.
 
 # Proxy 
-Lorem ipsum
+Our project was developed using Microservices as an architecture style. To access any of our services you have to go through our proxy, which acts both as an ```API Gateway``` as well as an ```Authorization Firewall```. The Proxy was built with ```HAProxy``` together with some ```Lua``` scripts, that help facilitate more advanced operations, such as Authorization.
+
+As far as the usage is concerned, all you need to know is the main host and the corresponding paths that lead to the correct services. With a few exceptions, every request needs to be authorized. As mentioned above, we take care of that before the requests actually reach a service. So, in order for you to get your request validated by the proxy you need to append an ```Authorization token``` to the headers of the request, token that you would receive upon login.
+
+### Service HTTP Paths - ```Port:80```
+```/auth``` --> Auth Service
+
+```/user``` --> User Service
+
+```/products``` --> Products Service
+
+```/wishlist``` --> Wishlist Service
+
+```/``` --> Friend Status Service (The WebSocket connection only requires the host in this case, because we only have one Socket server, so rerouting to a different path is not necessary)
+
+### Service SFTP Path - ```Port: 22```
+```/``` --> SFTP Service
+
+### *Notes: 
+* There are other services that are only meant for internal use, thus not being exposed through the proxy.
+
+* Most, if not all the paths described in each individual service showcase the full path, which includes the root path of the service described above.
+
 
 # Auth
 Lorem ipsum
