@@ -614,7 +614,7 @@ Models are used to for output or input information of the socket events for this
 
 Event ```user_connected```
 
-**Parameter**
+**Argument**
 ```
 {
   "friendsList": Friend[]
@@ -625,20 +625,20 @@ Event ```user_connected```
 
 Event ```friends_status```
 
-**Parameter**
+**Argument**
 ```
 FriendWithStatus[]
 ```
 
 Event ```update_user_status```
 
-**Parameter 1**
+**Argument 1**
 ```
 {
   "userId": String,
 }
 ```
-**Parameter 2**
+**Argument 2**
 ```
 {
   "status": String
