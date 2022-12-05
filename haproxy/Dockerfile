@@ -6,7 +6,6 @@ WORKDIR /usr/local/etc/haproxy
 RUN sed -i -e 's/\r$//' ./install.sh
 RUN ["chmod", "+x", "./install.sh"]
 RUN ./install.sh luaoauth
-#ENTRYPOINT ["docker-entrypoint.sh"]
-
-#USER haproxy
-CMD ["haproxy", "-f", "./haproxy.cfg"]
+# USER haproxy
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["haproxy", "-f", "/usr/local/etc/haproxy/haproxy.cfg"]
