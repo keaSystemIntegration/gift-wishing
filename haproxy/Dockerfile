@@ -8,3 +8,7 @@ COPY . .
 RUN sed -i -e 's/\r$//' /usr/src/install.sh
 RUN ["chmod", "+x", "./install.sh"]
 RUN ./install.sh luaoauth
+#ENTRYPOINT ["docker-entrypoint.sh"]
+
+#USER haproxy
+CMD ["haproxy", "-f", "/usr/local/etc/haproxy/haproxy.cfg"]
