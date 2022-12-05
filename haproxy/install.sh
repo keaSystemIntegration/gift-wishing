@@ -1,5 +1,5 @@
 #!/bin/bash
-SOURCE_DIR=/usr/src
+SOURCE_DIR=/usr/local/etc/haproxy
 LUA_VERSION=5.3.5
 
 install_luaoauth_var=false
