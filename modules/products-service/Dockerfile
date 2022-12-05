@@ -10,5 +10,5 @@ RUN pnpm generate-prisma
 COPY src ./src
 RUN pnpm build
 
-EXPOSE $PORT
+#EXPOSE 8080
 CMD ["node", "./dist/app.js"]

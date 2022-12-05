@@ -4,15 +4,17 @@ services:
         deploy:
             resources:
                 limits:
-                    cpus: '0.50'
+                    cpus: '0.4'
                     memory: '512M'
-        image: giftwishingwe.azurecr.io/haproxy
+        image: giftwishingwe.azurecr.io/proxy
         build: ./haproxy
+#        volumes:
+#          - ./haproxy:/usr/local/etc/haproxy
         ports:
-            - '80:80'
-            - '22:22'
+          - '80:80'
+          - '22:22'
         environment:
-            - JWT_SECRET=${AUTH_SERVICE_JWT_SECRET}
+          - JWT_SECRET=${AUTH_SERVICE_JWT_SECRET}
         restart: on-failure
 
     rabbitmq-server:
@@ -21,11 +23,13 @@ services:
         deploy:
             resources:
                 limits:
-                    cpus: '0.50'
+                    cpus: '0.2'
                     memory: '512M'
         build: ./modules/rabbitmq-server
         environment:
-            - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
+          - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
+        restart: on-failure
+
 
     redis-service:
       container_name: redis-server
@@ -33,6 +37,11 @@ services:
       build:
         context: ./modules/redis-service
         dockerfile: Dockerfile
+      deploy:
+        resources:
+          limits:
+            cpus: "0.2"
+            memory: "512M"
       restart: on-failure
 
     sftp-service:
@@ -40,7 +49,7 @@ services:
       deploy:
         resources:
           limits:
-            cpus: "0.50"
+            cpus: "0.2"
             memory: "512M"
       container_name: sftp-service
       build:
@@ -56,22 +65,20 @@ services:
         - RABBITMQ_SERVICE_HOST=$RABBITMQ_SERVICE_HOST
         - RABBITMQ_SERVICE_USER=$RABBITMQ_SERVICE_USER
         - RABBITMQ_SERVICE_PASSWORD=$RABBITMQ_SERVICE_PASSWORD
-      depends_on:
-        - rabbitmq-server
 
     products-service:
       image: giftwishingwe.azurecr.io/products-service
       deploy:
         resources:
           limits:
-            cpus: "0.50"
+            cpus: "0.2"
             memory: "512M"
       build: ./modules/products-service
       container_name: products-service
-      ports:
-        - "8005:8005"
+#      ports:
+#        - "8080:8080"
       environment:
-        - PORT=8005
+        - PRODUCTS_SERVICE_PORT=$PRODUCTS_SERVICE_PORT
         - PRODUCTS_SERVICE_DATABASE_URL=$PRODUCTS_SERVICE_DATABASE_URL
         - SFTP_SERVICE_URL=$SFTP_SERVICE_URL
         - SFTP_SERVICE_USERNAME=$SFTP_SERVICE_USERNAME
@@ -80,18 +87,14 @@ services:
         - RABBITMQ_SERVICE_USER=$RABBITMQ_SERVICE_USER
         - RABBITMQ_SERVICE_PASSWORD=$RABBITMQ_SERVICE_PASSWORD
         - PRODUCTS_SERVICE_REDIS_URL=$PRODUCTS_SERVICE_REDIS_URL
-
       restart: on-failure #TODO: find a better solution for timing the docker image
-      depends_on:
-        - sftp-service
-        - rabbitmq-server
 
     user-service:
       image: giftwishingwe.azurecr.io/user-service
       deploy:
         resources:
           limits:
-            cpus: "0.50"
+            cpus: "0.2"
             memory: "512M"
       build:
         context: ./modules/user-service
@@ -110,14 +113,15 @@ services:
         - EMAIL_SERVER_ACCESS_TOKEN=${EMAIL_SERVER_ACCESS_TOKEN}
         - EMAIL_SERVER_SENDER_EMAIL=${EMAIL_SERVER_SENDER_EMAIL}
         - EMAIL_SERVER_SENDER_PASSWORD=${EMAIL_SERVER_SENDER_PASSWORD}
-        - EMAIL_SERVER_SENDER_PASSWORD=${EMAIL_SERVER_SENDER_PASSWORD}
+        - USER_SERVICE_AZURE_BLOB_STORAGE_CONNECTION=${USER_SERVICE_AZURE_BLOB_STORAGE_CONNECTION}
+        - USER_SERVICE_AZURE_BLOB_STORAGE_CONTAINER=${USER_SERVICE_AZURE_BLOB_STORAGE_CONTAINER}
 
     auth-service:
       image: giftwishingwe.azurecr.io/auth-service
       deploy:
         resources:
           limits:
-            cpus: '0.50'
+            cpus: '0.2'
             memory: '512M'
       build: ./modules/auth-service
       environment:
@@ -127,10 +131,44 @@ services:
         - AUTH_SERVICE_MONGO_DATABASE=${AUTH_SERVICE_MONGO_DATABASE}
         - AUTH_SERVICE_JWT_SECRET=${AUTH_SERVICE_JWT_SECRET}
 
+    wishlist-service:
+      image: giftwishingwe.azurecr.io/wishlist-service
+      build:
+        context: ./modules/wishlist-service
+        target: production
+      deploy:
+        resources:
+          limits:
+            cpus: '0.2'
+            memory: '512M'
+      environment:
+        - WISHLIST_SERVICE_PORT=${WISHLIST_SERVICE_PORT}
+        - WISHLIST_CONNECTION_URL=${WISHLIST_CONNECTION_URL}
+
+    friend-status-service:
+      image: giftwishingwe.azurecr.io/friend-status-service
+      deploy:
+        resources:
+          limits:
+            cpus: '0.2'
+            memory: '512M'
+      build:
+        context: ./modules/friend-status-service
+        target: production
+      environment:
+        - FRIEND_STATUS_SERVICE_PORT=${FRIEND_STATUS_SERVICE_PORT}
+
+
 volumes:
     sftp-upload:
-        driver: azure_file
-        driver_opts:
-            share_name: sftp-upload
-            storage_account_name: giftwishingstoragewe
-            remotepath: home
+#      driver: azure_file
+#      driver_opts:
+#        share_name: sftp-upload
+#        storage_account_name: giftwishingstoragewe
+#        remotepath: home
+#    haproxy:
+#      driver: azure_file
+#      driver_opts:
+#        share_name: haproxy-vol
+#        storage_account_name: giftwishingstoragewe
+#        remotepath: home

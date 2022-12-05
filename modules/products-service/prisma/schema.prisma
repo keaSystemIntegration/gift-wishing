@@ -9,7 +9,7 @@ datasource db {
 }
 
 model products {
-  id           String @id
+  id           String   @id
   name         String
   subTitle     String   @map("sub_title")
   description  String
