@@ -12,7 +12,6 @@ services:
 #          - ./haproxy:/usr/local/etc/haproxy
     ports:
       - '80:80'
-      - '22:22'
     environment:
       - JWT_SECRET=${AUTH_SERVICE_JWT_SECRET}
     restart: on-failure
@@ -44,27 +43,29 @@ services:
           memory: "512M"
     restart: on-failure
 
-#  sftp-service:
-#    image: giftwishingwe.azurecr.io/sftp-service
-#    deploy:
-#      resources:
-#        limits:
-#          cpus: "0.2"
-#          memory: "512M"
-#    container_name: sftp-service
-#    build:
-#      context: ./modules/sftp-service
-#      dockerfile: ./Dockerfile
-#      args:
-#        - SFTP_SERVICE_USERNAME=$SFTP_SERVICE_USERNAME
-#        - SFTP_SERVICE_PASSWORD=$SFTP_SERVICE_PASSWORD
-#    volumes:
-#      - sftp-upload:/home/$SFTP_SERVICE_USERNAME/upload
-#    environment:
-#      - SFTP_SERVICE_USERNAME=$SFTP_SERVICE_USERNAME
-#      - RABBITMQ_SERVICE_HOST=$RABBITMQ_SERVICE_HOST
-#      - RABBITMQ_SERVICE_USER=$RABBITMQ_SERVICE_USER
-#      - RABBITMQ_SERVICE_PASSWORD=$RABBITMQ_SERVICE_PASSWORD
+  sftp-service:
+    image: giftwishingwe.azurecr.io/sftp-service
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: "512M"
+    container_name: sftp-service
+    ports:
+      - "22:22"
+    build:
+      context: ./modules/sftp-service
+      dockerfile: ./Dockerfile
+      args:
+        - SFTP_SERVICE_USERNAME=$SFTP_SERVICE_USERNAME
+        - SFTP_SERVICE_PASSWORD=$SFTP_SERVICE_PASSWORD
+    volumes:
+      - sftp-upload:/home/$SFTP_SERVICE_USERNAME/upload
+    environment:
+      - SFTP_SERVICE_USERNAME=$SFTP_SERVICE_USERNAME
+      - RABBITMQ_SERVICE_HOST=$RABBITMQ_SERVICE_HOST
+      - RABBITMQ_SERVICE_USER=$RABBITMQ_SERVICE_USER
+      - RABBITMQ_SERVICE_PASSWORD=$RABBITMQ_SERVICE_PASSWORD
 
   products-service:
     image: giftwishingwe.azurecr.io/products-service
@@ -75,8 +76,6 @@ services:
           memory: "512M"
     build: ./modules/products-service
     container_name: products-service
-#      ports:
-#        - "8080:8080"
     environment:
       - PRODUCTS_SERVICE_PORT=$PRODUCTS_SERVICE_PORT
       - PRODUCTS_SERVICE_DATABASE_URL=$PRODUCTS_SERVICE_DATABASE_URL
@@ -131,34 +130,34 @@ services:
       - AUTH_SERVICE_MONGO_DATABASE=${AUTH_SERVICE_MONGO_DATABASE}
       - AUTH_SERVICE_JWT_SECRET=${AUTH_SERVICE_JWT_SECRET}
 
-#  wishlist-service:
-#    image: giftwishingwe.azurecr.io/wishlist-service
-#    build:
-#      context: ./modules/wishlist-service
-#      target: production
-#    deploy:
-#      resources:
-#        limits:
-#          cpus: '0.2'
-#          memory: '512M'
-#    environment:
-#      - WISHLIST_SERVICE_PORT=${WISHLIST_SERVICE_PORT}
-#      - WISHLIST_CONNECTION_URL=${WISHLIST_CONNECTION_URL}
-#
-#  friend-status-service:
-#    image: giftwishingwe.azurecr.io/friend-status-service
-#    deploy:
-#      resources:
-#        limits:
-#          cpus: '0.2'
-#          memory: '512M'
-#    build:
-#      context: ./modules/friend-status-service
-#      target: production
-#    environment:
-#      - FRIEND_STATUS_SERVICE_PORT=${FRIEND_STATUS_SERVICE_PORT}
-#
-#
+  wishlist-service:
+    image: giftwishingwe.azurecr.io/wishlist-service
+    build:
+      context: ./modules/wishlist-service
+      target: production
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: '512M'
+    environment:
+      - WISHLIST_SERVICE_PORT=${WISHLIST_SERVICE_PORT}
+      - WISHLIST_CONNECTION_URL=${WISHLIST_CONNECTION_URL}
+
+  friend-status-service:
+    image: giftwishingwe.azurecr.io/friend-status-service
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: '512M'
+    build:
+      context: ./modules/friend-status-service
+      target: production
+    environment:
+      - FRIEND_STATUS_SERVICE_PORT=${FRIEND_STATUS_SERVICE_PORT}
+
+
 volumes:
   sftp-upload:
     driver: azure_file
