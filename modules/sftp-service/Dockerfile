@@ -20,5 +20,5 @@ COPY ./publish-update.sh /etc/sftp.d/publish-update.sh
 RUN sed -i -e 's/\r$//' /etc/sftp.d/publish-update.sh
 RUN ["chmod", "+x", "/etc/sftp.d/publish-update.sh"]
 RUN ["chmod", "+x", "/etc/sftp.d/sftp-config.sh"]
-EXPOSE 22
+
 ENTRYPOINT ["/entrypoint"]

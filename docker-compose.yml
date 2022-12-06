@@ -5,8 +5,8 @@ services:
         ports:
             - '80:80'
             - '22:22'
-        volumes:
-            - ./haproxy:/usr/local/etc/haproxy
+#        volumes:
+#            - haproxy:/usr/local/etc/haproxy
         environment:
             - JWT_SECRET=${AUTH_SERVICE_JWT_SECRET}
         restart: on-failure
@@ -52,7 +52,7 @@ services:
         build: ./modules/products-service
         container_name: products-service
         environment:
-            - PORT=$PRODUCTS_SERVICE_POST
+            - PORT=$PRODUCTS_SERVICE_PORT
             - PRODUCTS_SERVICE_DATABASE_URL=$PRODUCTS_SERVICE_DATABASE_URL
             - SFTP_SERVICE_URL=$SFTP_SERVICE_URL
             - SFTP_SERVICE_USERNAME=$SFTP_SERVICE_USERNAME
@@ -112,4 +112,4 @@ services:
             - FRIEND_STATUS_SERVICE_PORT=${FRIEND_STATUS_SERVICE_PORT}
 volumes:
     sftp-upload:
-    haproxy:
+#    haproxy:
