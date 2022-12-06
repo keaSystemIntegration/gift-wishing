@@ -21,7 +21,7 @@ using the email server on Azure and therefore you don't need to set it up locall
 
 ## Online Version
 
-This app can be found online at _________. 
+This app can be found online at http://20.76.108.92/. 
 This version is hosted on Microsoft Azure.
 
 # Proxy 
@@ -40,7 +40,7 @@ As far as the usage is concerned, all you need to know is the main host and the 
 
 ```/``` --> Friend Status Service (The WebSocket connection only requires the host in this case, because we only have one Socket server, so rerouting to a different path is not necessary)
 
-### Service SFTP Path - ```Port: 22```
+### Service SFTP Path - ```Port: 7777```
 ```/``` --> SFTP Service
 
 ### *Notes: 
@@ -80,7 +80,7 @@ The products service is using redis to store you most recent results for any req
 and products. The cache has time to live of 60 seconds
 
 # SFTP
-In the application you will find sftp server that runs on port 22 (sftp://$user:$password@$endpoint) the credentials can be found in the .env. 
+In the application you will find sftp server that runs on port 7777 (sftp://$user:$password@$endpoint:7777) the credentials can be found in the .env. 
 It can be accessed with any sftp client (fx: [Cyberduck](https://cyberduck.io/), [FileZilla](https://filezilla-project.org/))
 After accessing the server you can view or replace the products.db. Please note that you should follow the schema as 
 described at the products section, or communicate with the development team if needed.

@@ -12,6 +12,7 @@ services:
 #          - ./haproxy:/usr/local/etc/haproxy
     ports:
       - '80:80'
+      - "7777:7777"
     environment:
       - JWT_SECRET=${AUTH_SERVICE_JWT_SECRET}
     restart: on-failure
@@ -51,8 +52,8 @@ services:
           cpus: "0.2"
           memory: "512M"
     container_name: sftp-service
-    ports:
-      - "22:22"
+#    ports:
+#      - "22:22"
     build:
       context: ./modules/sftp-service
       dockerfile: ./Dockerfile
