@@ -50,7 +50,45 @@ As far as the usage is concerned, all you need to know is the main host and the 
 
 
 # Auth
-Lorem ipsum
+**ROOT:** /auth
+
+It is recommended that you integrate our Auth Service, instead of using a third party approach, as it works in sync with the User Service for some operations. For all the routes below the expected response contains a ```token``` string and a ```user``` object with decoded claims to be used by the client. Reiterating the explanation in the Proxy section, subsequent to the authentication, you would need to take that ```token``` and append it to the headers of your next requests. Then, the proxy will take care of the rest.
+
+```Authorization = 'Bearer ' + token```
+
+### Routes
+```/auth/signin``` @[POST]
+
+Body: 
+```
+{
+   email: String,
+   password: String
+}
+```
+
+```/auth/signup``` @[POST]
+
+Body: 
+```
+{
+   email: String,
+   username: String,
+   name: String,
+   password: String
+}
+```
+
+*Note: There are 2 types of sign-ups: the one shown above and the one that is done through a friend invitation. For the 2nd one, you would have to use the same api call, with a slight tweak to the request body. An inviteToken needs to be attached and then the request will adjust accordingly.
+```
+{
+   email: String,
+   username: String,
+   name: String,
+   password: String,
+   inviteToken: String
+}
+```
 
 # Products
 The products service is a service that expose for the user a graphql endpoint where it can fetch a list of products 
