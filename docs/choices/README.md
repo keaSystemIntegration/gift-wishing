@@ -47,8 +47,16 @@ the system, but can be triggered by different events.
 
 ## Inner Services Decisions
 
-### Product Service
-### SFTP Service
+### Product Service VS SFTP Service
+Product service is responsible for providing a products to a client's request over the http protocol with GraphQL server
+endpoint. SFTP server is a server where a client can store data and download data. The main idea of the sftp server is 
+to expose an endpoint where a client can upload a sqlite database that contains products. When a client would like to 
+query the database, it will be accessed through the product service in GraphQL post request. 
+Achieving this structure raise some challenges:
+ - sqlite is suited for in memory database
+ - a new database can be inserted to the sftp in anytime
+ - the product service should access the sftp storage
+ - notifying the products service that there is a new database 
 ### Proxy Service
 ### User Service
 ### Wishlist Service
