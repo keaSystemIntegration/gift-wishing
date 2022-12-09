@@ -27,5 +27,5 @@ export class Product {
     link!: string
 
     @Field()
-    overallRanking!: number
+    overallRank!: number
 }
