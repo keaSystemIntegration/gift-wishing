@@ -47,16 +47,37 @@ the system, but can be triggered by different events.
 
 ## Inner Services Decisions
 
-### Product Service VS SFTP Service
-Product service is responsible for providing a products to a client's request over the http protocol with GraphQL server
+### Products Service VS SFTP Service
+Products service is responsible for providing a products to a client's request over the http protocol with GraphQL server
 endpoint. SFTP server is a server where a client can store data and download data. The main idea of the sftp server is 
 to expose an endpoint where a client can upload a sqlite database that contains products. When a client would like to 
 query the database, it will be accessed through the product service in GraphQL post request. 
-Achieving this structure raise some challenges:
+Achieving this structure raises some challenges:
  - sqlite is suited for in memory database
- - a new database can be inserted to the sftp in anytime
- - the product service should access the sftp storage
+ - the products service should access the sftp storage
+ - a new database can be inserted to the sftp at anytime
  - notifying the products service that there is a new database 
+
+Firstly to achieve sqlite in memory we needed to create a download capabilities for the product service. By downloading
+the sqlite into the products server we could get better performance from the sqlite implementation. But direct communication 
+between the SFTP server and the product will couple thies services to decouple them they need to communicate through the 
+proxy server. By doing so we are solving the first and the second issue.
+
+However, now when the database is in memory, we reach to the third problem that described above, which mean that there
+will might inconsistency between the in-memory database in the products service and a new version of the database on the
+SFTP service. To solve this issue we have created a script that listen to the ``products.db`` file and whenever there is 
+an updates to this file, it will send a message to the products service. when the products service gets the message, it
+will download the file again. 
+
+Now, when solving the constancy issue and the sqlite optimization, we found out that we will have a scalability concern. 
+If we scale the products service horizontally and there is a message from the sftp service, only the server that currently 
+gets the message (for example in round-robin), will know that there is a new database. In addition, download new database, 
+will be an intensive process. 
+
+To answer thies issues, we implemented a Pub/Sub with RabbitMQ, that the SFTP publish a message to the exchange point 
+about a new database to download, and all the products services are subscribers to that exchange, and they will download 
+the new database when the message arrives.
+
 ### Proxy Service
 ### User Service
 ### Wishlist Service
