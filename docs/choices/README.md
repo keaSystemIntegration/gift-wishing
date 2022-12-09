@@ -77,6 +77,7 @@ will be an intensive process.
 To answer thies issues, we implemented a Pub/Sub with RabbitMQ, that the SFTP publish a message to the exchange point 
 about a new database to download, and all the products services are subscribers to that exchange, and they will download 
 the new database when the message arrives.
+![products vs sftp](../overview_of_the_system/products-sftp-diagram.png)
 
 ### Proxy Service
 ### User Service
