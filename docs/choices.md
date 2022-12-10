@@ -141,6 +141,10 @@ Third, we discarded the idea of storing images as Base64 strings in a database d
 Deciding on Azure vs other storage options, was simply a matter of preference and availability for us as students.
 
 ### Wishlist Service
+For this service, we decided to go with a REST API since the server does not have to communicate with other services or execute complex queries that require to access specific object fields (some of the advantages of using GraphQL).
+
+Another aspect we had to consider was the database type. We decided to use a documented database for this service since there is only one table/document (so no relationships/MySQL database) and, intuitively, no in depth queries(Graph Database) that could slow down the response time.
+
 ### Friends Service
 Friends service is providing an event-based communication between client and server through the web socket protocol. For this, we used the socket.io which is one of the most DX friendly library when it comes to bidirectional communication since it has a well written documentation and an intuitive integration process. Its main responsibility is to offer the client the current status of each user to all his/her friends. 
 
