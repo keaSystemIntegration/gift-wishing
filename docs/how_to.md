@@ -263,19 +263,18 @@ This environment variable has been created to hide the port number.
 
 ### Internal dependencies
 Friends Service is using the following internal dependencies:
-| Package name        | Version     |
-|---------------------|-------------|
-| express             | ^4.18.2     |
-| socket.io           | 4.5.3       |
-| dotenv              | ^16.0.3     |
-| cookie-parser       | ^1.4.6      |
-
-| @types/cookie-parser| ^1.4.3      |
-| @types/express      | ^4.17.14    |
-| ts-node-dev         | ^2.0.0      |
-| ts-node             | ^10.9.1     |
-| rimraf              | ^3.0.2      |
-| typescript          | ^4.9.3      |
+| Package name         | Version     |
+|----------------------|-------------|
+| express              | ^4.18.2     |
+| socket.io            | 4.5.3       |
+| dotenv               | ^16.0.3     |
+| cookie-parser        | ^1.4.6      |
+| @types/cookie-parser | ^1.4.3      |
+| @types/express       | ^4.17.14    |
+| ts-node-dev          | ^2.0.0      |
+| ts-node              | ^10.9.1     |
+| rimraf               | ^3.0.2      |
+| typescript           | ^4.9.3      |
 
 ### Docker setup
 Friend service is using a dockerfile which has 2 stages, one for development and one for production. These 2 instruct the docket compose how to build the container. The lines are executed sequentially, so first, the development environment will be containerized. Then, if the product stage is specified in docker compose file, it will copy the ./dist directory from the development container and use it as the root project, applying only the production dependencies.
