@@ -84,3 +84,119 @@ sftp storage. The access granted to the user that logs into the server and gives
 the library ``inotify-tools``. when the file is being change it will execute the python script ``send.py``
 
 ``send.py``: A python script that send a message into the exchange point upload-db in the RabbitMQ server.
+
+## User Service
+In this section we’ll go over the technologies used in building the user service, it’s dependencies, structure, docker setup, and environment variables.
+
+### Internal dependencies
+The user service is built using NodeJS, with TypeScript and ExpressJS.
+User Service internal dependencies are as follows:
+
+| Package name        | Version     |
+|---------------------|-------------|
+| @azure/storage-blob | 12.12.0     |
+| axios               | 1.1.3       |
+| dotenv              | 16.0.3      |
+| express             | 4.18.2      |
+| jsonwebtoken        | 8.5.1       |
+| multer              | 1.4.5-lts.1 |
+| neo4j-driver        | 5.2.0       |
+| uuid                | 9.0.0       |
+| cookie-parser       | 1.4.6       |
+| ts-node-dev         | 2.0.0       |
+| ts-node             | 10.0.1      |
+| rimraf              | 3.0.2       |
+
+
+These dependencies include both production dependencies and development dependencies. Most notable development dependencies are ts-node, ts-node-dev, and rimraf. Modules ts-node and ts-node-dev were imported for running TypeScript, and together offer cool functionalities such as ‘hot reload’, even when running inside docker containers. Command script for hot reload inside a docker container ```ts-node-dev --poll <path/app.ts>```. The module rimraf, was imported to properly get rid of the ```./build``` directory before rebuilding the project using the ```tsc``` command. We had some trouble rebuilding properly, so this module came to the rescue.
+
+### Structure
+Structure src directory inside the user service
+```text
+.
+├── database
+|   └── neo4j.ts
+├── middleware
+|   ├── profile-picture-guard.ts
+|   └── user-guard.ts
+├── models
+|   ├── enums
+|   |   └── FriendStatus.ts
+|   ├── Email.ts
+|   ├── Friend.ts
+|   ├── InviteToken.ts
+|   └── User.ts
+├── repositories
+|   ├── friend-repository.ts
+|   ├── invite-repository.ts
+|   ├── relationship-repository.ts
+|   └── user-repository.ts
+├── routes
+|   ├── friend-routes.ts
+|   ├── invite-routes.ts
+|   ├── profile-picture-routes.ts
+|   ├── relationship-routes.ts
+|   └── user-routes.ts
+├── services
+|   ├── email-server-service.ts
+|   ├── friend-service.ts
+|   ├── invite-service.ts
+|   ├── jwt-service.ts
+|   ├── profile-picture-service.ts
+|   ├── relationship-service.ts
+|   └── user-service.ts
+├── templates
+|   └── email-invitation-templates.ts
+├── validation
+|   └── input-validation.ts
+├── app.ts
+
+```
+
+### Docker setup
+User service makes use of two docker compose files, one for development and one for production. Within the dockerfile, 
+we have ‘stages’ for development and production that instruct docker compose how to build the container. It will start 
+from the top down, first containerizing the development environment, and if instructed to run the production stage, 
+it will use the newly created ```./build``` directory from the development container, as the root project for the 
+production container, using only production dependencies.  
+For details, inspect the dockerfile in ```user-service``` in the module directory, and docker-compose.dev.yml and 
+docker-compose.yml/deployment-docer-compose.yml.
+
+### External dependencies
+#### Neo4j:
+User service stores all user data in a Neo4j graph database except for the user's profile picture.
+
+Neo4j has unique constraints for ```username, email and userId```.
+
+Node structure is quite simple:
+```USER-[FRIENDS_WITH]->USER``` where the ```USER``` node contains all relevant information about the 
+user: ```userId, name, username, email and signupDate``` while the ```FRIENDS_WITH``` 
+relationship contains all relevant information about user relationships: ```status, and originatorUserId```.
+
+The ```status``` in relationship holds enum values found in ```FriendStatus.ts``` in the source code. 
+While ```originatorUserId```represents the user that sent a friend request to the other user. For further details, 
+see ```docs/documents/instructions.md```.
+
+#### Azure blob storage:
+User service stores all user profile pictures in azure blob storage. Saving the files in the format ```<username>_profile-picture.png```.
+The file format extension ```.png``` is hard coded.
+
+#### Email Service:
+User service uses an external dependency to send emails for when users want to invite other users to join the application.
+When/if a user accepts the invite, they will automatically be friends, persisted in the Neo4j database.
+
+### Environment variables needed for the user service
+```text
+USER_SERVICE_PORT=
+USER_SERVICE_NEO4J_URL=
+USER_SERVICE_NEO4J_USERNAME=
+USER_SERVICE_NEO4J_PASSWORD=
+USER_SERVICE_AURA_INSTANCENAME=
+USER_SERVICE_JWT_SECRET=
+USER_SERVICE_SIGNUP_URL=
+EMAIL_SERVER_URL_LOCAL=
+EMAIL_SERVER_URL_PROD=
+EMAIL_SERVER_ACCESS_TOKEN=
+EMAIL_SERVER_SENDER_EMAIL=
+EMAIL_SERVER_SENDER_PASSWORD=
+```
