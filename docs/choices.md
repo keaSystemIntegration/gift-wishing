@@ -5,10 +5,32 @@ separation of concerns, and decoupling.
 ![System diagram](../overview_of_the_system/System_design.png)
 The system architecture is a microservice architecture. That allow for each component to be self-isolated and run 
 independently. Microservices, helps to achieve scalability, each service can scale by itself on needs, unlike monolithic 
-architecture where scaling required scaling for the entire system.  
+architecture where scaling requires scaling for the entire system.  
 In addition, it gives us, the developers the opportunity to separate the workload and takes decisions for 
 each component, rather than take decisions as a whole. Inner communication between services is happening through the 
-proxy or with a que, which decouple services from each other.
+proxy or with a queue, which decouple services from each other.
+
+### Service communication and synchronization
+Synchronous vs Asynchronous communication.
+Defining when we need synchronous communiaction; when service A needs feedback when communicating with service B.
+In cases where service A does not need feedback, we considered asynchronous communication.
+
+For brokerless synchronous communication, we considered REST API and gRPC, both over HTTP.
+Speed was considered, however as both REST and gRPC support HTTP 2, the differences would be negligible, if any. Decision was taken to use REST API for communcation between services that needed to be synchronous. The reasons being simplicity, technological know-how, and we did not need streaming and bidirectional communication.
+
+For brokered synchronous communication, we chose to use Redis Pub/Sub.
+```DOUBLE CHECK HERE AND IF CORRECT THAT IT IS SYNC WE NEED MORE HERE```
+
+For asynchronous communication, we only considered Queue-based communication using Redis or RabbitMQ.
+The communication between the product service and the SFTP server use RabbitMQ for communicating an event.
+Relevant pros and cons of each broker:
+RabbitMQ:
+(-) Maintenance
+(+) Fault tolerance
+(+) Flexibility
+(+) Reliability
+Redis:
+...
 
 ## Deployment Decisions
 Our system created with a container base architecture- virtualization. It is an operating system level virtualization 
@@ -81,6 +103,44 @@ the new database when the message arrives.
 
 ### Proxy Service
 ### User Service
+#### Communication
+Communication decisions between user service and other services.
+As described in the “how_to” document, the user service has three external dependencies that we have control over and maintain. The decisions related to these dependencies are mainly how we decided to store images and text relevant for users. These are described here below in this section.
+
+Other decisions were regarding how we keep this service synchronized with other services. So defining who depends on the user service is essential, and is described in more detail in the “how_to” document in the Auth Service section, as it is the only service that has user service as a dependency.
+
+The synchronization decision was then between the user service keeping the auth service updated or vice versa. However, going over each services functionality, we see that it is not possible to give one service that responsibility as a whole, we have to do it depending on the use case, so we’ll go over each of them:
+
+**Creating a user.** Auth service is responsible for signing up, and logging in users, so the obvious decision here is for the auth service to keep user service up to date when a user is created.
+
+**Updating and deleting a user.** User service is responsible for updating and deleting a user. Here the user service is responsible for keeping the auth service synchronized.
+
+Referring back to the communications section in this document, we mentioned that we needed synchronized communication, exactly for this reason. And in all three scenarios here above, we don’t want the user to get a success response unless the action the user wanted to take was successful in all services. For example, when a user is signing up for the application, the auth service will have to await confirmation from the user service, that the user has been successfully created, before responding back to the client.
+
+One more communication decision that is related to the user service is its communication with the email service. The user service is responsible for sending invitation emails, and a decision was taken that the communication here should be synchronous for user experience. An asynchronous call from the user service to the email service, could certainly be considered a better approach. We could’ve used RabbitMQ, and configure an email queue to be durable in case of the email service failing. In this scenario, the invitation email would not be lost, however it would be late, so it would be at the expense of user experience.
+
+In fact we did first create an email service that received email requests from such a queue. However later in the development process, we both realized that the user experience would be sub-optimal, along with problems related to serverless function integration with RabbitMQ, we decided on synchronous communication.
+
+#### Storage decisions
+Other significant decisions for the user service was how it would store both user text data and images for users.
+
+Why Neo4j?
+First, we started by ruling out document databases due to maintenance issues with many to many relationships. Therefore our choice was between a relational database and graph database.
+Ultimately, we decided on a graph database because of the following reasons:
+Graph databases can be more performant, especially when there are large amounts of many to many relationships.
+Relational databases follow a rigid structure, which is likely to result in slower development due to original database modeling and updates that would occur during development.
+Future scaling opportunities, relational databases are hard to scale.
+Possible feature updates, as we’re building a sort of social platform, if at some point we decide we want to create for example a friend suggestions feature. Traversing a graph database to see friends-of-friends will be much faster and easier than with a relational database.
+
+Why Azure blob storage?
+First, we discarded the idea of storing the images locally in the user service, because the user service is running in a docker container and is not a valid option for persisting data.
+
+Second, we discarded the idea of storing the images as blobs in a database as it is hard to scale, slow, and expensive.
+
+Third, we discarded the idea of storing images as Base64 strings in a database due to storage cost and increased stress on the database and the overhead from encoding the images slows down the request-response.
+Deciding on Azure vs other storage options, was simply a matter of preference and availability for us as students.
+
 ### Wishlist Service
 ### Friends Service
 ### Auth Service
+### Email Service
