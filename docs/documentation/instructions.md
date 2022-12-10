@@ -537,7 +537,13 @@ Models are used to for output or input information of the API calls for this ser
 ```
 {
   name: String,
-  url: String
+  link: String,
+  subTitle: String,
+  category: String,
+  subCategory: String,
+  description: String,
+  overallRank: Number,
+  price: Number
 }
 ```
 
