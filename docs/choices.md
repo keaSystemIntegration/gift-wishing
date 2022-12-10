@@ -119,7 +119,7 @@ Referring back to the communications section in this document, we mentioned that
 
 One more communication decision that is related to the user service is its communication with the email service. The user service is responsible for sending invitation emails, and a decision was taken that the communication here should be synchronous for user experience. An asynchronous call from the user service to the email service, could certainly be considered a better approach. We could’ve used RabbitMQ, and configure an email queue to be durable in case of the email service failing. In this scenario, the invitation email would not be lost, however it would be late, so it would be at the expense of user experience.
 
-In fact we did first create an email service that received email requests from such a queue. However later in the development process, we both realized that the user experience would be sub-optimal, along with problems related to serverless function integration with RabbitMQ, we decided on synchronous communication.
+In fact, we did first create an email service that received email requests from such a queue. However later in the development process, we both realized that the user experience would be sub-optimal, along with problems related to serverless function integration with RabbitMQ, we decided on synchronous communication.
 
 #### Storage decisions
 Other significant decisions for the user service was how it would store both user text data and images for users.

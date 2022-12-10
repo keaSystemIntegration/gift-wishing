@@ -1,42 +1,42 @@
-
-
 Structure of our services
 for example:
 Language, modules(?), stuff used, databases,.. technologies.
 Anything we'd like to remember if we were going to do it again.
 Environment Variables
 Purpose
-- Integrates with what?
-- Used to do this in the overall system.
-Links to deployed version if applicable.
 
-  
+-   Integrates with what?
+-   Used to do this in the overall system.
+    Links to deployed version if applicable.
+
 ## Products Service
 
-Products service is a microservice that responsible for communication between a client and a SqlLite database. 
+Products service is a microservice that responsible for communication between a client and a SqlLite database.
 Please make sure that you have theis running on your machine before starting the service:
-- node version 18 install
-- pnpm install [installation guide](https://pnpm.io/installation)
-- RabbitMQ service up and running
-- optional: Redis
 
-The microservice is exposing a graphql server on port 8080 by default, or any port that will be specified in 
-the environment variables by the key ``PRODUCTS_SERVICE_PORT``. The products microservice needs to know where
-the SqlLite file is located, and it can be specified as environment variable under the key ``PRODUCTS_SERVICE_DATABASE_URL``.
+-   node version 18 install
+-   pnpm install [installation guide](https://pnpm.io/installation)
+-   RabbitMQ service up and running
+-   optional: Redis
 
-For lunching the server, please make sure that you have a RabbitMQ server, with exchange under the name ``update-db``
-The connection to the RabbitMQ server can be specified in the environment variables under  ``RABBITMQ_SERVICE_HOST`` ,
-``RABBITMQ_SERVICE_USER`` and ``RABBITMQ_SERVICE_PASSWORD``. 
+The microservice is exposing a graphql server on port 8080 by default, or any port that will be specified in
+the environment variables by the key `PRODUCTS_SERVICE_PORT`. The products microservice needs to know where
+the SqlLite file is located, and it can be specified as environment variable under the key `PRODUCTS_SERVICE_DATABASE_URL`.
 
-If you would like to add Redis, the default connection string is ``redis://localhost:6379`` otherwise you can change
-it in the environment variable ``PRODUCTS_SERVICE_REDIS_URL``
+For lunching the server, please make sure that you have a RabbitMQ server, with exchange under the name `update-db`
+The connection to the RabbitMQ server can be specified in the environment variables under `RABBITMQ_SERVICE_HOST` ,
+`RABBITMQ_SERVICE_USER` and `RABBITMQ_SERVICE_PASSWORD`.
 
-After all the services in place you can run ``pnpm dev``
+If you would like to add Redis, the default connection string is `redis://localhost:6379` otherwise you can change
+it in the environment variable `PRODUCTS_SERVICE_REDIS_URL`
 
-The products service is using typescript that provides better development experience and helps to catch errors before compiling 
+After all the services in place you can run `pnpm dev`
 
-The Products service uses [Prisma](https://www.prisma.io/docs) as ORN which helps to create types for the data in the database. 
-To get start with Prisma all that need to be specified is this part of the schema.Prisma 
+The products service is using typescript that provides better development experience and helps to catch errors before compiling
+
+The Products service uses [Prisma](https://www.prisma.io/docs) as ORN which helps to create types for the data in the database.
+To get start with Prisma all that need to be specified is this part of the schema.Prisma
+
 ```
 generator client {
   provider = "prisma-client-js"
@@ -48,42 +48,57 @@ datasource db {
   url      = env("PRODUCTS_SERVICE_DATABASE_URL")
 }
 ```
-After you add theis lines, you can execute ``npx prisma db pull`` and the object types will be generated automatically. 
-The next step is to run ``npx prisma generate``, this will generate the client library for access the database.
+
+After you add theis lines, you can execute `npx prisma db pull` and the object types will be generated automatically.
+The next step is to run `npx prisma generate`, this will generate the client library for access the database.
 
 Since the products service is using typescript, one of the library that this service uses is TypeGraphQL. TypeGraphQL helps
-to generate from classes in Typescript the graphql schema. For more information please 
+to generate from classes in Typescript the graphql schema. For more information please
 [read here](https://typegraphql.com/docs/introduction.html#why).
 
-For creating graphql endpoints we use [Apollo](https://www.apollographql.com/docs/). It is providing 
+For creating graphql endpoints we use [Apollo](https://www.apollographql.com/docs/). It is providing
 a simple API for integration with nodeJS. Apollo jas a straight forwards setup and easy to maintain.
 
 To add a caching layer we used [Keyv](https://www.npmjs.com/package/keyv) which works with json objects. Apollo server
- 
+
 ## SFTP
-The SFTP service used for receiving and storing SqLite files. The main file that this server is responsible for storing 
-is ``products.db``.
 
-To run the SFTP container, please install first Docker. After you install Docker, you can build the ``Dockerfile`` with 
+The SFTP service used for receiving and storing SqLite files. The main file that this server is responsible for storing
+is `products.db`. In addition, the SFTP file should be able to inform other services if the products.db file has been 
+change.
 
-```docker build --build-arg SFTP_SERVICE_USERNAME=${user} --build-arg SFTP_SERVICE_PASSWORD=${password} -t ${image-name} .```
+To run the SFTP container, please install first Docker. After you install Docker, you can build the `Dockerfile` with
 
-and run it with 
+`docker build --build-arg SFTP_SERVICE_USERNAME=${user} --build-arg SFTP_SERVICE_PASSWORD=${password} -t ${image-name} .`
 
-``docker run -dp 22:22 ${sftpimagename}`` 
+and run it with
 
-The base image of SFTP that we are using is ``atmoz/sftp`` which can gives us the base sftp capabilities, in addition for
-customisation. 
+`docker run -dp 22:22 ${image-name}`
+
+The base image of SFTP that we are using is `atmoz/sftp` which can gives us the base sftp capabilities, in addition for
+customisation.
 
 In the SFTP image there is three scripts:
 
-``sftp-config.sh``: A bash script that runs on the image initialization, and responsible for changing access level of the 
-sftp storage. The access granted to the user that logs into the server and gives the right to modified his set directory. 
+`sftp-config.sh`: A bash script that runs on the image initialization, and responsible for changing access level of the
+sftp storage. The access granted to the user that logs into the server and gives the right to modified his set directory.
 
-``publish-update``: This script is responsible for listening to a change on the user's products file. The script uses 
-the library ``inotify-tools``. when the file is being change it will execute the python script ``send.py``
+`publish-update`: This script is responsible for listening to a change on the user's products file. The script uses
+the library `inotify-tools`. when the file is being change it will execute the python script `send.py`
 
-``send.py``: A python script that send a message into the exchange point upload-db in the RabbitMQ server.
+`send.py`: A python script that send a message into the exchange point upload-db in the RabbitMQ server.
+
+## RabbitMQ
+
+Uses for asynchronous communication between the SFTP service and the products service. The service RabbitMQ service uses 
+the default management package which provide in addition to the RabbitMQ, a UI where you can visualize the exchanges and users. 
+The management UI used for creating the additional users and exchanges. 
+To run the RabbitMQ server you can execute ``docker build -t ${image-name} . `` and to run the image ``docker run -d -p 5672:5672 15672:15672 ${image-name}``. 
+If you would like to access the UI please have a look in the username and password in the environment variables. 
+
+## Redis
+Redis is used for caching queries for the products service. to start container of redis please insert in your terminal
+``docker build -t ${image-name} . `` and to run the image ``docker run -d -p 5672:5672 15672:15672 ${image-name}``.
 
 ## User Service
 In this section we’ll go over the technologies used in building the user service, it’s dependencies, structure, docker setup, and environment variables.
@@ -160,7 +175,7 @@ from the top down, first containerizing the development environment, and if inst
 it will use the newly created ```./build``` directory from the development container, as the root project for the 
 production container, using only production dependencies.  
 For details, inspect the dockerfile in ```user-service``` in the module directory, and docker-compose.dev.yml and 
-docker-compose.yml/deployment-docer-compose.yml.
+docker-compose.yml/deployment-docker-compose.yml.
 
 ### External dependencies
 #### Neo4j:
