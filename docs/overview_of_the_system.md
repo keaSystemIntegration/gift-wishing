@@ -1,0 +1,1 @@
+![System Diagram](./overview_of_the_system/System_Design.png)
