@@ -105,11 +105,11 @@ The products are stored in a single table in the sql server. the structure is as
 The database type is sqlite that exist inside the products service. If you would like to update the db and create new 
 entry you should follow the current schema that describe in the table above. 
 To upload the new db you should access the sftp server and replace the current db file with your new file. The file name
-has to be named ```products.db```. The product service is listening to a que, and in a case that there is a new message in that
+has to be named ``products.db``. The product service is listening to a que, and in a case that there is a new message in that
 que, it will download the new database file to the product service (view sequence diagram below)
 
-The sftp service can be access on localhost:22. The sftp server connected to a que (RabbitMQ) and in a case that the 
-```products.db``` has been updated it will add a message to the que.
+The sftp service can be access on localhost:7777. The sftp server connected to a que (RabbitMQ) and in a case that the 
+``products.db`` has been updated it will add a message to the que.
 
 In case that you would like to change the current db structure please contact the development team, and we will update it
 as you wish.

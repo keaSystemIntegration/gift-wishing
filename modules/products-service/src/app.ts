@@ -71,7 +71,6 @@ ampq.connect(
 async function main() {
     const server = new ApolloServer({
         schema: await graphQLSchema,
-        //...(await typeDefsAndResolvers),
         cache: new KeyvAdapter(new Keyv(redisUrl)),
         plugins: [responseCachePlugin()],
     })
