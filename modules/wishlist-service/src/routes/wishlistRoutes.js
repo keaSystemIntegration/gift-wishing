@@ -65,8 +65,7 @@ router.patch('/', getWishlist, async (req, res) => {
   try {
     let updatedWishlist = res.wishlist;
     updatedWishlist.products = newProducts;
-    updatedWishlist.save();
-
+    await updatedWishlist.save();
     res.status(202).json(updatedWishlist);
   } catch (error) {
     res.status(400).json({ message: error.message });
