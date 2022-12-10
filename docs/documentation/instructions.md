@@ -533,7 +533,7 @@ Models are used to for output or input information of the API calls for this ser
 }
 ```
 
-### Product (Not finished)
+### Product
 ```
 {
   name: String,
