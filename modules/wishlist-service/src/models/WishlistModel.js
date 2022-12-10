@@ -2,7 +2,13 @@ import mongoose, { mongo } from 'mongoose';
 
 const ProductSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  url: { type: String, required: true }
+  link: { type: String, required: true },
+  subTitle: { type: String, required: true },
+  category: { type: String, required: true },
+  subCategory: { type: String, required: true },
+  description: { type: String, required: true },
+  overallRank: { type: Number, required: true },
+  price: { type: Number, required: true }
 });
 
 const WishlistSchema = new mongoose.Schema({

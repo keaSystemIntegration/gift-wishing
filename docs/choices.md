@@ -141,6 +141,18 @@ Third, we discarded the idea of storing images as Base64 strings in a database d
 Deciding on Azure vs other storage options, was simply a matter of preference and availability for us as students.
 
 ### Wishlist Service
+For this service, we decided to go with a REST API since the server does not have to communicate with other services or execute complex queries that require to access specific object fields (some of the advantages of using GraphQL).
+
+Another aspect we had to consider was the database type. We decided to use a documented database for this service since there is only one table/document (so no relationships/MySQL database) and, intuitively, no in depth queries(Graph Database) that could slow down the response time.
+
 ### Friends Service
+Friends service is providing an event-based communication between client and server through the web socket protocol. For this, we used the socket.io which is one of the most DX friendly library when it comes to bidirectional communication since it has a well written documentation and an intuitive integration process. Its main responsibility is to offer the client the current status of each user to all his/her friends. 
+
+In initial solution for this issue was to connect each user to the socket server and to broadcast to everyone other user their current status. This could be an easy solution to implement, but quite inefficient when it comes to performance. This is because a lot of events would be emitted to users that are not friends between each other, so the server would consume a lot of resources redundantly (an user can see the status of another user only if they are friends).
+
+A more optimal solution was to use the concept of 'rooms' from socket.io, so that when a user connects, the server creates a room with their user id and based on a list of friends that is passed by the client, it can emit only to the online friends the current user status. This way, the number of events is minimized and can process more operations (a socket.io server can sustain around 10 000 concurrent connections).
+
+In terms of scalability, the socket server can the be scaled horizontally by adding a a mechanism which can keep all the servers in sync. Socket.io provides different integrations such as Redis which would act as a message broker that would pass messages between each server. This way, if 2 friends are connected on 2 different servers, they will push the event to the Redis database which will redirect it to all the subscribed servers.
+
 ### Auth Service
 ### Email Service

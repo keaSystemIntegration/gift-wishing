@@ -215,3 +215,83 @@ EMAIL_SERVER_ACCESS_TOKEN=
 EMAIL_SERVER_SENDER_EMAIL=
 EMAIL_SERVER_SENDER_PASSWORD=
 ```
+
+## Wishlist Service
+In this section, it will be presented the technologies used in building the wishlist service, its environment variables, dependencies,  docker setup, and an explanation of how the service was created.
+
+### Technologies
+This service has been implemented to provide the client the possibility to manipulate wishlists through API calls. The server has been created with Nodejs using express to serve the application and having the data stored into a MongoDB database. The mongoose library has been also used as an object data modeling (ODM) to manage the data in an easier manner.
+
+### Environment variables needed for the user service
+```text
+WISHLIST_CONNECTION_URL
+WISHLIST_SERVICE_PORT
+```
+These environmental variables have been created to hide the port number and the connection url used to connect with the database.
+
+### Internal dependencies
+Wishlist Service is using the following internal dependencies:
+| Package name        | Version     |
+|---------------------|-------------|
+| express             | ^4.18.2     |
+| mongoose            | ^6.7.2      |
+| dotenv              | ^16.0.3     |
+| cookie-parser       | ^1.4.6      |
+
+### Docker setup 
+Friend service is using a dockerfile which has 2 stages, one for development and one for production. These 2 instruct the docket compose how to build the container. The lines are executed sequentially, so first, the development environment will be containerized. Then, if the product stage is specified in docker compose file, it will copy the everything from the development container and use it as the root project, applying only the production dependencies.
+
+### How was created
+
+The service was implemented to provide to the client the possibility to read, create, update or delete wishlists from the database.
+
+From the server side perspective, when a client requests to read a specific wishlist, the system checks if the user's id already belongs to an existing wishlist, in which case it will return it back to the user. Otherwise, a new wishlist will be created. This is possible because, at this point, we know the user is authenticated and authorized to do this operation. 
+
+Besides this, the user is also able to update their wishlist with products that are stored in the products service. However, if the user decides to erase their account, the wishlist associated to this account can be removed as well from the database.
+
+## Friend Service
+In this section, we’ll go over the technologies used in building the friends service, its dependencies, environment variables,  docker setup, and an explanation of how the service was created.
+
+### Technologies
+This service has been implemented to offer the client the possibility to display the social statuses of a user's friends in real time without reloading the page. The server has been implemented with Nodejs using express, http and Socket.io libraries. Besides this, Typescript was also used to add an extra layer of security and to catch potential errors.
+
+### Environment variables needed for the user service
+```text
+FRIEND_STATUS_SERVICE_PORT
+```
+This environment variable has been created to hide the port number.
+
+### Internal dependencies
+Friends Service is using the following internal dependencies:
+| Package name         | Version     |
+|----------------------|-------------|
+| express              | ^4.18.2     |
+| socket.io            | 4.5.3       |
+| dotenv               | ^16.0.3     |
+| cookie-parser        | ^1.4.6      |
+| @types/cookie-parser | ^1.4.3      |
+| @types/express       | ^4.17.14    |
+| ts-node-dev          | ^2.0.0      |
+| ts-node              | ^10.9.1     |
+| rimraf               | ^3.0.2      |
+| typescript           | ^4.9.3      |
+
+### Docker setup
+Friend service is using a dockerfile which has 2 stages, one for development and one for production. These 2 instruct the docket compose how to build the container. The lines are executed sequentially, so first, the development environment will be containerized. Then, if the product stage is specified in docker compose file, it will copy the ./dist directory from the development container and use it as the root project, applying only the production dependencies.
+
+### How was created
+The service is designed so that when an authorized user connects, he/she will see their list of friends and their online status ('online', 'offline', 'not registered'). At the same time, the user will be seen by his/her online friends with the status 'online'. 
+
+Another aspect is that even though an user opens multiple tabs or logs in from different devices, their status will switch to 'offline' only when all the instances have been closed.
+
+Internally, when a client application is open, an event is automatically emitted to this service. With this event, the client should pass an object which contains the list of friends identified through their id's. On the server side, the user id, which is obtained from the cookie claims, is used to create a new socket room. This is really important because the rooms are stored into a global variable which can be accessed by any room.
+
+After this, a function will return back an array with the list of friends and their online status. Inside this function, the algorithm loops through the list of friends and determines the online status of each friend based on a couple of conditions. 
+
+One of them is the existence of the friend's username. If this value is null, this means the user sent an invitation link to an email address which was not accepted by this person. This happens because, once the invitation is sent, a new user will be automatically created in the user service and added as a friend of the inviter. Until the invitation is accepted and an account is created, this new user will only contain the email of the invitee. Thus, a status of 'not registered' will be added to this friend.
+
+The other one is the existence of a socket room with the same id as the friend's. This is why we mentioned the importance of a global variable for socket rooms. Once an user becomes online, their id is added to this global variable which will help the server to determine which friend is either online or offline. In case the socket room (which is the friend's id) exists, an 'online' status will be added to this friend and an event will be sent to the client which will inform the friend that the user is online. Otherwise, the function simply adds the status of 'offline' for this friend. 
+
+Then, at the end of this event, another event will be emitted to the client, sending an array with the current social statuses. 
+
+The last event is triggered when a user closes the website. When this happens, the server will loop through the list of friends and will emit to all the online friends, the 'offline' status of the user. This action is executed only if the user has closed all the open tabs with this application including all the devices where is logged in.
