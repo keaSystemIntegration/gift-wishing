@@ -237,6 +237,7 @@ Wishlist Service is using the following internal dependencies:
 | mongoose            | ^6.7.2      |
 | dotenv              | ^16.0.3     |
 | cookie-parser       | ^1.4.6      |
+| cors                | ^2.8.5      |
 
 ### Docker setup 
 Friend service is using a dockerfile which has 2 stages, one for development and one for production. These 2 instruct the docket compose how to build the container. The lines are executed sequentially, so first, the development environment will be containerized. Then, if the product stage is specified in docker compose file, it will copy the everything from the development container and use it as the root project, applying only the production dependencies.
