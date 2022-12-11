@@ -65,8 +65,6 @@ emails on specific events, but does not require instance response, is deployed o
 Functions. The serverless architecture is used for running a single function, that can be decoupled from other parts of 
 the system, but can be triggered by different events. 
 
-## Storage Decisions
-
 ## Inner Services Decisions
 
 ### Products Service VS SFTP Service
