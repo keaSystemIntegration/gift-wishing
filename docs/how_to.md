@@ -9,6 +9,102 @@ Purpose
 -   Used to do this in the overall system.
     Links to deployed version if applicable.
 
+## Auth Service
+
+The Auth Service is given the purpose of providing the client application access to the rest of our services. It does that in synergy with the proxy service. The first endpoints the client would hit are the ones from this service. This would take place during the ***Sign In*** / ***Sign Up*** operations. After performing the aforementioned actions, the client receives an ***Authorization*** **token** to be used in other subsequent requests.
+
+### Pre-Requisites
+
+* Node
+* Docker
+* IDE / Code Editor
+* [MongoDB Cloud Atlas Account](https://cloud.mongodb.com/)
+* MongoDB IP Address Whitelisting
+
+### Server & Flow of Events
+The server was built using `Node` and `Express` as the core pieces, together with a few dependencies solely focused on the purpose of the service: Authentication.
+
+![Signup_Flow](./overview_of_the_system/Signup_Flow.png)
+
+### Dependencies
+
+| Package name        | Version     |
+|---------------------|-------------|
+| axios               | ^1.1.3      |
+| bcryptjs            | ^2.4.3      |
+| express             | ^4.18.2     |
+| jsonwebtoken        | ^8.5.1      |
+| mongoose            | ^6.7.2      |
+| dotenv              | ^16.0.3     |
+
+### Database
+The database type used for this service was `NoSQL`, precisely a `Document Database`: ***MongoDB***.
+
+First and foremost, a cluster needs to be created on your Cloud Atlas account. Then you can create a collection inside the cluster, which, for this service, is the only one we actually need.
+
+Inside the Express server, we connect to the database using `mongoose`, which is a MongoDB Object Modelling Tool. We do this using the connection string provided by our cluster as follows:
+
+``` javascript
+import mongoose from 'mongoose';
+
+const mongoURI = `mongodb+srv://${process.env.AUTH_SERVICE_MONGO_USERNAME}:${process.env.AUTH_SERVICE_MONGO_PASSWORD}
+@gift-wish-auth.rpteshg.mongodb.net/${process.env.AUTH_SERVICE_MONGO_DATABASE}?retryWrites=true&w=majority`;
+
+try {
+  mongoose.connect(mongoURI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  });
+
+  mongoose.connection.on('connected', () => {
+    console.log('Successfully connected to the mongo db instance');
+  });
+} catch (error) {
+  console.log('Unable to connect to the database:', error);
+}
+```
+
+`AuthUser` Schema:
+
+``` javascript
+    _id: ObjectId(String),
+    email: String,
+    name: String,
+    username: String,
+    password: String
+```
+*Note: `_id` is implicit and doesn't have to be manually set in an `AuthUser` Object. The other fields are required.
+
+### Environment Variables
+```
+APPID=
+AUTH_SERVICE_MONGO_USERNAME=
+AUTH_SERVICE_MONGO_PASSWORD=
+AUTH_SERVICE_MONGO_DATABASE=
+AUTH_SERVICE_JWT_SECRET=
+```
+
+### Local Installation
+Depending on whether you want to run the service by itself or together with all the other services, the installation can differ a bit. For a self-contained installation (not recommended), all you would have to do following the cloning of the repository would be: 
+
+``` bash
+$ cd modules/auth-service
+```
+``` bash
+$ npm install
+```
+
+However, for a complete showcase, it is advisable to use the docker setup instead. So, after opening the repository:
+``` bash
+$ docker-compose up --build
+```
+
+*Note: It is not necessary to specify the file in the command above, since the CLI will use the default `docker-compose.yml` we have inside our project directory.
+
+### Local Usage
+
+This service runs on `Port 4500`, based on the environment set in the `docker-compose.yml` file.
+
 ## Products Service
 
 Products service is a microservice that responsible for communication between a client and a SqlLite database.
