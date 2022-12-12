@@ -22,13 +22,15 @@ The Auth Service is given the purpose of providing the client application access
 * MongoDB IP Address Whitelisting
 
 ### Server & Flow of Events
-The server was built using `Node` and `Express` as the core pieces, together with a few dependencies solely focused on the purpose of the service: Authentication.
+The server was built using `Node` and `Express` as the core pieces, together with a few dependencies solely focused on the purpose of this service: Authentication.
 
-Below will be shown the 2 main flows covered by this microservice. The flows illustrate other services as well, when necessary, in order to put emphasis on clarity and completeness.
+Below there will be shown the 2 main flows covered by this microservice. The flows illustrate other services as well, when necessary, in order to emphasize their the clarity and completeness.
 
 Sign Up Flow:
 
 ![Signup_Flow](./overview_of_the_system/Signup_Flow.png)
+
+*Important note: This flow, ideally, works in sync with the `User Service`'s create user operation. Hence, we need to make sure that both services contain the same users at all times. Moreover, we cannot afford a delay (i.e. The User Service adds the newly created user from Auth Service later). For this to happen, the `Sign Up` only succeeds when both transactions succeed in their own service.
 
 Sign In Flow:
 
