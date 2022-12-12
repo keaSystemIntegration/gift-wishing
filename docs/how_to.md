@@ -30,7 +30,7 @@ Sign Up Flow:
 
 ![Signup_Flow](./overview_of_the_system/Signup_Flow.png)
 
-*Important note: This flow, ideally, works in sync with the `User Service`'s create user operation. Hence, we need to make sure that both services contain the same users at all times. Moreover, we cannot afford a delay (i.e. The User Service adds the newly created user from Auth Service later). For this to happen, the `Sign Up` only succeeds when both transactions succeed in their own service.
+*Important note: This flow, ideally, works in sync with the `User Service`'s create user operation. Hence, we need to make sure that both services contain the same users at all times. Moreover, we cannot afford a delay (i.e. The User Service adds the newly created user from Auth Service later). For this to happen, the `Sign Up` completes only when both transactions succeed in their own service.
 
 Sign In Flow:
 
@@ -77,11 +77,11 @@ try {
 After that, we need to define our `AuthUser` schema inside our server following the document format:
 
 ``` javascript
-    _id: ObjectId(String),
-    email: String,
-    name: String,
-    username: String,
-    password: String
+_id: ObjectId(String),
+email: String,
+name: String,
+username: String,
+password: String
 ```
 *Note: `_id` is implicit and doesn't have to be manually set in an `AuthUser` object. The other fields are required.
 
@@ -99,6 +99,24 @@ We will use this model to perform operations on our database. An example showing
 const authUser = new AuthUser({ email, password, username, name });
 
 await authUser.save();
+```
+
+Not only that, but we can also use the model to automate certain functionalities (e.g. Password Hashing), or add methods to it (e.g. Compare Passwords). I will show the first example: 
+
+``` javascript
+authUserSchema.pre('save', async function (next) {
+let user = this;
+if (!user.isModified('password')) {
+  return next;
+}
+
+try {
+  user.password = await cryptSync(user.password);
+  next();
+} catch (err) {
+  next(err);
+}
+});
 ```
 
 ### Environment Variables
@@ -120,16 +138,18 @@ $ cd modules/auth-service
 $ npm install
 ```
 
-However, for a complete showcase, it is advisable to use the docker setup instead. So, after opening the repository:
+However, for a complete showcase, it is advisable to use the docker setup instead. So, after opening the repository in your code editor, execute:
 ``` bash
 $ docker-compose up --build
 ```
 
-*Note: It is not necessary to specify the file in the command above, since the CLI will use the default `docker-compose.yml` we have inside our project directory.
+*Note: It is not necessary to specify the docker-compose file in the command above, since the CLI will use the default `docker-compose.yml` we have inside our project directory.
 
 ### Local Usage
 
-This service runs on `Port 4500`, based on the environment set in the `docker-compose.yml` file.
+This service runs on `Port 4500`, based on the environment set in the `docker-compose.yml` file, or on `Port 5000` by default. 
+
+If trying to access the service through the proxy, you can do it following the flows illustrated towards the beginning of the section. You can also disregard the port, as everything is taken care of by docker, as long as it is properly configured.
 
 ## Products Service
 
