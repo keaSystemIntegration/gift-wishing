@@ -24,6 +24,8 @@ The Auth Service is given the purpose of providing the client application access
 ### Server & Flow of Events
 The server was built using `Node` and `Express` as the core pieces, together with a few dependencies solely focused on the purpose of the service: Authentication.
 
+Below will be shown the 2 main flows covered by this microservice. The flows illustrate other services as well, when necessary, in order to put emphasis on clarity and completeness.
+
 Sign Up Flow:
 
 ![Signup_Flow](./overview_of_the_system/Signup_Flow.png)
@@ -46,7 +48,7 @@ Sign In Flow:
 ### Database
 The database type used for this service was `NoSQL`, precisely a `Document Database`: ***MongoDB***.
 
-First and foremost, a cluster needs to be created on your Cloud Atlas account. Then you can create a collection inside the cluster, which, for this service, is the only one we actually need.
+First and foremost, a cluster needs to be created on your Cloud Atlas account. Then you can create a database and then a collection, which, for this service, is the only one we actually need.
 
 Inside the Express server, we connect to the database using `mongoose`, which is a MongoDB Object Modelling Tool. We do this using the connection string provided by our cluster as follows:
 
@@ -70,7 +72,7 @@ try {
 }
 ```
 
-`AuthUser` Schema:
+After that, we need to define our `AuthUser` schema inside our server following the document format:
 
 ``` javascript
     _id: ObjectId(String),
@@ -79,7 +81,23 @@ try {
     username: String,
     password: String
 ```
-*Note: `_id` is implicit and doesn't have to be manually set in an `AuthUser` Object. The other fields are required.
+*Note: `_id` is implicit and doesn't have to be manually set in an `AuthUser` object. The other fields are required.
+
+Once the setup is done, we can access an `AuthUser` model in our application like so:
+
+``` javascript
+import mongoose from 'mongoose';
+
+const AuthUser = mongoose.model('AuthUser');
+```
+
+We will use this model to perform operations on our database. An example showing how to create a document inside our `authusers` collection:
+
+``` javascript
+const authUser = new AuthUser({ email, password, username, name });
+
+await authUser.save();
+```
 
 ### Environment Variables
 ```
