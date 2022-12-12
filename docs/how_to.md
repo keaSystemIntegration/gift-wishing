@@ -24,7 +24,13 @@ The Auth Service is given the purpose of providing the client application access
 ### Server & Flow of Events
 The server was built using `Node` and `Express` as the core pieces, together with a few dependencies solely focused on the purpose of the service: Authentication.
 
+Sign Up Flow:
+
 ![Signup_Flow](./overview_of_the_system/Signup_Flow.png)
+
+Sign In Flow:
+
+![Signin Flow](./overview_of_the_system/Signin_Flow.png)
 
 ### Dependencies
 
