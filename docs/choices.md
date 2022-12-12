@@ -2,7 +2,7 @@
 In this document you can read about the development team decisions regarding architectural, deployment, complexity, 
 separation of concerns, and decoupling. 
 ## Architectural Decisions
-![System diagram](../overview_of_the_system/System_design.png)
+![System diagram](./overview_of_the_system/System_Design.png)
 The system architecture is a microservice architecture. That allow for each component to be self-isolated and run 
 independently. Microservices, helps to achieve scalability, each service can scale by itself on needs, unlike monolithic 
 architecture where scaling requires scaling for the entire system.  
