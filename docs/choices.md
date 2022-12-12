@@ -2,7 +2,7 @@
 In this document you can read about the development team decisions regarding architectural, deployment, complexity, 
 separation of concerns, and decoupling. 
 ## Architectural Decisions
-![System diagram](../overview_of_the_system/System_design.png)
+![System diagram](./overview_of_the_system/System_Design.png)
 The system architecture is a microservice architecture. That allow for each component to be self-isolated and run 
 independently. Microservices, helps to achieve scalability, each service can scale by itself on needs, unlike monolithic 
 architecture where scaling requires scaling for the entire system.  
@@ -97,9 +97,33 @@ will be an intensive process.
 To answer thies issues, we implemented a Pub/Sub with RabbitMQ, that the SFTP publish a message to the exchange point 
 about a new database to download, and all the products services are subscribers to that exchange, and they will download 
 the new database when the message arrives.
-![products vs sftp](../overview_of_the_system/products-sftp-diagram.png)
+![products vs sftp](./overview_of_the_system/products-sftp-diagram.png)
 
-### Proxy Service
+### Auth Service & Proxy
+The Auth Service is in charge of authenticating users into our application, but it doesn't do that by itself, but in combination with the Proxy. The Auth Service only provides the client application with the necessary details to perform secured requests, and it is the Proxy that actually checks the user's identity and performs the authentication per se.
+
+#### Architecture 
+Before committing to this approach, our ideas took this part of the application through different iterations. The first assumption was that the Auth Service would be in charge of both, but that's not the most efficient approach when using microservices. We cannot use a middleware inside our Auth Service to authorize requests to other services. And even if we did that, then the Auth Service would almost act like a proxy itself. It was clear that we needed to find a different solution to this.
+
+Then came the 2nd iteration, where we considered having 2 proxies and 2 services working together towards Authentication. At that time, our architecture diagram looked like this:
+![Old_diagram](./overview_of_the_system/old_diagram.png)
+
+Basically, the idea was that we would have a `Proxy Outer` that would forward requests to the `Auth Service` or the `Firewall` based on whether they required authorization or not. Then, the `Firewall` would do the same based on whether the authorization succeeded or not and forward to the `Proxy Inner` or the `Auth Service`. Lastly, the `Proxy Inner` would redirect the request to the proper service. It wasn't very obvious at the time we designed this diagram, but it became clearer as the implementation started that this was not it either. Not only it would introduce potential problems, like not being able to send the `user claims` to the services post-authorization, but it would also increase redundancy, and, overall, lower performance, since a request would have to go through multiple layers before actually reaching its destination.
+
+Finally, the latest design is much more simple and also makes more sense. As shown at the beginning of the document, we are now only using a single `Proxy`, that also acts as a `Firewall`, and, of course, one `Auth Service`. The reason this was not our go-to approach initially could be due to our lack of experience in working with proxies, precisely its security features. Basically, we weren't sure if it was actually possible to authorize inside a proxy (for free). This aspect differs from provider to provider, so it is harder to predict without some trial and error. Fortunately, it eventually worked for us, which definitely helped lower the responsibility of the other services as far as authentication is concerned. Moreover, it also became easier to understand from an external viewpoint. 
+
+#### Provider
+The choice of the proxy provider was probably not the best decision for us, overall, as it proved to be quite difficult to work with at times. We have used *HAProxy* in our project configuration, and while it is a lightweight solution, with a relatively quick setup, it is very limited once you try to tweak it a bit more. Aside that, it sometimes posed problems during our deployment as well. The most challening part about it was implementing the architecture described above, where, in addition, it has the responsibility of a `Firewall`. The problem here was the fact that *HAProxy* doesn't provide any built-in features to facilitate this and the only path you can follow to achieve this is through the integration of a special script written in `Lua` language.
+
+So, the choice here was, rather, whether to stick with HAProxy, or change the provider altogether, because the script integration raised its own challenges. Debugging with *HAProxy* and `Lua` would not be the most intuitive either, which increased the difficulty of the implementation. 
+
+Eventually, everything worked, so we stuck to it, but for future projects, we would most likely consider other options.
+
+#### Storage
+As far as the storage is concerned, the `Auth Service` uses a simple *MongoDB* database, with just one collection of `authusers`. Since we would split the User into 2 types of users in our application (`AuthUser` & `User` - from `User Service`), each with their own responsibility, a fair consideration here was that we should use one of the most simple and flexible options to accommodate our service. Our database would not feature any relationships, so it was pretty obvious that we would use NoSQL for this individual service, at least.
+
+One particular feature of *MongoDB* suitable for this service is the `Flexible Document Schemas` that it provides. Even though our documents have certain required fields, there can be situations when there are more than those specified, and we would want to adjust to that. We even feature such an example in our application (i.e. The Sign Up of a friend who has been invited by a user). Besides that, it is highly scalable, performant, cost-effective, and its setup is very simple, which made this an easy choice.
+
 ### User Service
 #### Communication
 Communication decisions between user service and other services.
@@ -152,5 +176,4 @@ A more optimal solution was to use the concept of 'rooms' from socket.io, so tha
 
 In terms of scalability, the socket server can the be scaled horizontally by adding a a mechanism which can keep all the servers in sync. Socket.io provides different integrations such as Redis which would act as a message broker that would pass messages between each server. This way, if 2 friends are connected on 2 different servers, they will push the event to the Redis database which will redirect it to all the subscribed servers.
 
-### Auth Service
 ### Email Service

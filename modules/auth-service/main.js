@@ -16,9 +16,6 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(authRoutes);
 
-// allows to create a cookie parser middleware
-// app.use(cookieParser());
-
 const mongoURI = `mongodb+srv://${process.env.AUTH_SERVICE_MONGO_USERNAME}:${process.env.AUTH_SERVICE_MONGO_PASSWORD}
 @gift-wish-auth.rpteshg.mongodb.net/${process.env.AUTH_SERVICE_MONGO_DATABASE}?retryWrites=true&w=majority`;
 

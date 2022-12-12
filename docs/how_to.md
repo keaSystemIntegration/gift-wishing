@@ -9,7 +9,181 @@ Purpose
 -   Used to do this in the overall system.
     Links to deployed version if applicable.
 
-## Products Service
+# Auth Service
+
+The Auth Service is given the purpose of providing the client application access to the rest of our services. It does that in synergy with the proxy service. The first endpoints the client would hit are the ones from this service. This would take place during the ***Sign In*** / ***Sign Up*** operations. After performing the aforementioned actions, the client receives an ***Authorization*** **token** to be used in other subsequent requests.
+
+### Pre-Requisites
+
+* Node
+* Docker
+* IDE / Code Editor
+* [MongoDB Cloud Atlas Account](https://cloud.mongodb.com/)
+* MongoDB IP Address Whitelisting
+
+### Server & Flow of Events
+The server was built using `Node` and `Express` as the core pieces, together with a few dependencies solely focused on the purpose of this service: Authentication.
+
+Below there will be shown the 2 main flows covered by this microservice. The flows illustrate other services as well, when necessary, in order to emphasize their the clarity and completeness.
+
+Sign Up Flow:
+
+![Signup_Flow](./overview_of_the_system/Signup_Flow.png)
+
+*Important note: This flow, ideally, works in sync with the `User Service`'s create user operation. Hence, we need to make sure that both services contain the same users at all times. Moreover, we cannot afford a delay (i.e. The User Service adds the newly created user from Auth Service later). For this to happen, the `Sign Up` should only complete when both transactions succeed in their own service.
+
+Sign In Flow:
+
+![Signin Flow](./overview_of_the_system/Signin_Flow.png)
+
+### Dependencies
+
+| Package name        | Version     |
+|---------------------|-------------|
+| axios               | ^1.1.3      |
+| bcryptjs            | ^2.4.3      |
+| express             | ^4.18.2     |
+| jsonwebtoken        | ^8.5.1      |
+| mongoose            | ^6.7.2      |
+| dotenv              | ^16.0.3     |
+
+### Database
+The database type used for this service was `NoSQL`, precisely a `Document Database`: ***MongoDB***.
+
+First and foremost, a cluster needs to be created on your Cloud Atlas account. Then you can create a database and then a collection, which, for this service, is the only one we actually need.
+
+Inside the Express server, we connect to the database using `mongoose`, which is a MongoDB Object Modelling Tool. We do this using the connection string provided by our cluster as follows:
+
+``` javascript
+import mongoose from 'mongoose';
+
+const mongoURI = `mongodb+srv://${process.env.AUTH_SERVICE_MONGO_USERNAME}:${process.env.AUTH_SERVICE_MONGO_PASSWORD}
+@gift-wish-auth.rpteshg.mongodb.net/${process.env.AUTH_SERVICE_MONGO_DATABASE}?retryWrites=true&w=majority`;
+
+try {
+  mongoose.connect(mongoURI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  });
+
+  mongoose.connection.on('connected', () => {
+    console.log('Successfully connected to the mongo db instance');
+  });
+} catch (error) {
+  console.log('Unable to connect to the database:', error);
+}
+```
+
+After that, we need to define our `AuthUser` schema inside our server following the document format:
+
+``` javascript
+_id: ObjectId(String),
+email: String,
+name: String,
+username: String,
+password: String
+```
+*Note: `_id` is implicit and doesn't have to be manually set in an `AuthUser` object. The other fields are required.
+
+Once the setup is done, we can access an `AuthUser` model in our application like so:
+
+``` javascript
+import mongoose from 'mongoose';
+
+const AuthUser = mongoose.model('AuthUser');
+```
+
+We will use this model to perform operations on our database. An example showing how to create a document inside our `authusers` collection:
+
+``` javascript
+const authUser = new AuthUser({ email, password, username, name });
+
+await authUser.save();
+```
+
+Not only that, but we can also use the model to automate certain functionalities (e.g. Password Hashing), or add methods to it (e.g. Compare Passwords). I will show the first example: 
+
+``` javascript
+authUserSchema.pre('save', async function (next) {
+let user = this;
+if (!user.isModified('password')) {
+  return next;
+}
+
+try {
+  user.password = await cryptSync(user.password);
+  next();
+} catch (err) {
+  next(err);
+}
+});
+```
+
+### Environment Variables
+```
+APPID=
+AUTH_SERVICE_MONGO_USERNAME=
+AUTH_SERVICE_MONGO_PASSWORD=
+AUTH_SERVICE_MONGO_DATABASE=
+AUTH_SERVICE_JWT_SECRET=
+```
+
+### Docker Setup
+The docker setup for this service is quite straight-forward. In a nutshell, all we need to do is use a node image (latest, preferably), copy the necessary files to the desired directory and then run the `install` and `start` commands.
+
+``` dockerfile
+FROM node:18-alpine
+
+WORKDIR /home/node/app
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+CMD npm start
+```
+
+Then, in the `docker-compose.yml` file: 
+
+``` yml
+services: 
+.
+.
+  auth-service:
+      build: ./modules/auth-service
+      environment:
+          - APPID=4500
+          - AUTH_SERVICE_MONGO_USERNAME=${AUTH_SERVICE_MONGO_USERNAME}
+          - AUTH_SERVICE_MONGO_PASSWORD=${AUTH_SERVICE_MONGO_PASSWORD}
+          - AUTH_SERVICE_MONGO_DATABASE=${AUTH_SERVICE_MONGO_DATABASE}
+          - AUTH_SERVICE_JWT_SECRET=${AUTH_SERVICE_JWT_SECRET}
+```
+
+### Local Installation
+Depending on whether you want to run the service by itself or together with all the other services, the installation can differ a bit. For a self-contained installation (not recommended), all you would have to do following the cloning of the repository would be: 
+
+``` bash
+$ cd modules/auth-service
+```
+``` bash
+$ npm install
+```
+
+However, for a complete showcase, it is advisable to use the docker setup instead. So, after opening the repository in your code editor, execute:
+``` bash
+$ docker-compose up --build
+```
+
+*Note: It is not necessary to specify the docker-compose file in the command above, since the CLI will use the default `docker-compose.yml` we have inside our project directory.
+
+### Local Usage
+
+This service runs on `Port 4500`, based on the environment set in the `docker-compose.yml` file, or on `Port 5000` by default. 
+
+If trying to access the service through the proxy, you can do it following the flows illustrated towards the beginning of the section. You can also disregard the port, as everything is taken care of by docker, as long as it is properly configured.
+
+# Products Service
 
 Products service is a microservice that responsible for communication between a client and a SqlLite database.
 Please make sure that you have theis running on your machine before starting the service:
@@ -61,7 +235,7 @@ a simple API for integration with nodeJS. Apollo jas a straight forwards setup a
 
 To add a caching layer we used [Keyv](https://www.npmjs.com/package/keyv) which works with json objects. Apollo server
 
-## SFTP
+# SFTP
 
 The SFTP service used for receiving and storing SqLite files. The main file that this server is responsible for storing
 is `products.db`. In addition, the SFTP file should be able to inform other services if the products.db file has been 
@@ -100,7 +274,7 @@ If you would like to access the UI please have a look in the username and passwo
 Redis is used for caching queries for the products service. to start container of redis please insert in your terminal
 ``docker build -t ${image-name} . `` and to run the image ``docker run -d -p 5672:5672 15672:15672 ${image-name}``.
 
-## User Service
+# User Service
 In this section we’ll go over the technologies used in building the user service, it’s dependencies, structure, docker setup, and environment variables.
 
 ### Internal dependencies
@@ -216,7 +390,7 @@ EMAIL_SERVER_SENDER_EMAIL=
 EMAIL_SERVER_SENDER_PASSWORD=
 ```
 
-## Wishlist Service
+# Wishlist Service
 In this section, it will be presented the technologies used in building the wishlist service, its environment variables, dependencies,  docker setup, and an explanation of how the service was created.
 
 ### Technologies
@@ -249,7 +423,7 @@ From the server side perspective, when a client requests to read a specific wish
 
 Besides this, the user is also able to update their wishlist with products that are stored in the products service. However, if the user decides to erase their account, the wishlist associated to this account can be removed as well from the database.
 
-## Friend Service
+# Friend Service
 In this section, we’ll go over the technologies used in building the friends service, its dependencies, environment variables,  docker setup, and an explanation of how the service was created.
 
 ### Technologies
