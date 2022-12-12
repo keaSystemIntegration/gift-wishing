@@ -30,7 +30,7 @@ Sign Up Flow:
 
 ![Signup_Flow](./overview_of_the_system/Signup_Flow.png)
 
-*Important note: This flow, ideally, works in sync with the `User Service`'s create user operation. Hence, we need to make sure that both services contain the same users at all times. Moreover, we cannot afford a delay (i.e. The User Service adds the newly created user from Auth Service later). For this to happen, the `Sign Up` completes only when both transactions succeed in their own service.
+*Important note: This flow, ideally, works in sync with the `User Service`'s create user operation. Hence, we need to make sure that both services contain the same users at all times. Moreover, we cannot afford a delay (i.e. The User Service adds the newly created user from Auth Service later). For this to happen, the `Sign Up` should only complete when both transactions succeed in their own service.
 
 Sign In Flow:
 
@@ -126,6 +126,38 @@ AUTH_SERVICE_MONGO_USERNAME=
 AUTH_SERVICE_MONGO_PASSWORD=
 AUTH_SERVICE_MONGO_DATABASE=
 AUTH_SERVICE_JWT_SECRET=
+```
+
+### Docker Setup
+The docker setup for this service is quite straight-forward. In a nutshell, all we need to do is use a node image (latest, preferably), copy the necessary files to the desired directory and then run the `install` and `start` commands.
+
+``` dockerfile
+FROM node:18-alpine
+
+WORKDIR /home/node/app
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+CMD npm start
+```
+
+Then, in the `docker-compose.yml` file: 
+
+``` yml
+services: 
+.
+.
+  auth-service:
+      build: ./modules/auth-service
+      environment:
+          - APPID=4500
+          - AUTH_SERVICE_MONGO_USERNAME=${AUTH_SERVICE_MONGO_USERNAME}
+          - AUTH_SERVICE_MONGO_PASSWORD=${AUTH_SERVICE_MONGO_PASSWORD}
+          - AUTH_SERVICE_MONGO_DATABASE=${AUTH_SERVICE_MONGO_DATABASE}
+          - AUTH_SERVICE_JWT_SECRET=${AUTH_SERVICE_JWT_SECRET}
 ```
 
 ### Local Installation
