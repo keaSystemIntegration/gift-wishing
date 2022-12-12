@@ -544,6 +544,9 @@ Then, at the end of this event, another event will be emitted to the client, sen
 
 The last event is triggered when a user closes the website. When this happens, the server will loop through the list of friends and will emit to all the online friends, the 'offline' status of the user. This action is executed only if the user has closed all the open tabs with this application including all the devices where is logged in.
 
+### Friend Status Flow
+
+![ Friend_Status_Flow](./overview_of_the_system/Friend-Status-Flow-of-Events.png)
 
 # Email Service
 The email service is a serverless function on Azure, a “Function application” consisting of a single function. This is the only service part of the expose part of the project that is not running within a docker container in Azure’s container registry.
