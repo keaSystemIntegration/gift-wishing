@@ -9,7 +9,7 @@ Purpose
 -   Used to do this in the overall system.
     Links to deployed version if applicable.
 
-## Auth Service
+# Auth Service
 
 The Auth Service is given the purpose of providing the client application access to the rest of our services. It does that in synergy with the proxy service. The first endpoints the client would hit are the ones from this service. This would take place during the ***Sign In*** / ***Sign Up*** operations. After performing the aforementioned actions, the client receives an ***Authorization*** **token** to be used in other subsequent requests.
 
@@ -151,7 +151,7 @@ This service runs on `Port 4500`, based on the environment set in the `docker-co
 
 If trying to access the service through the proxy, you can do it following the flows illustrated towards the beginning of the section. You can also disregard the port, as everything is taken care of by docker, as long as it is properly configured.
 
-## Products Service
+# Products Service
 
 Products service is a microservice that responsible for communication between a client and a SqlLite database.
 Please make sure that you have theis running on your machine before starting the service:
@@ -203,7 +203,7 @@ a simple API for integration with nodeJS. Apollo jas a straight forwards setup a
 
 To add a caching layer we used [Keyv](https://www.npmjs.com/package/keyv) which works with json objects. Apollo server
 
-## SFTP
+# SFTP
 
 The SFTP service used for receiving and storing SqLite files. The main file that this server is responsible for storing
 is `products.db`. In addition, the SFTP file should be able to inform other services if the products.db file has been 
@@ -242,7 +242,7 @@ If you would like to access the UI please have a look in the username and passwo
 Redis is used for caching queries for the products service. to start container of redis please insert in your terminal
 ``docker build -t ${image-name} . `` and to run the image ``docker run -d -p 5672:5672 15672:15672 ${image-name}``.
 
-## User Service
+# User Service
 In this section we’ll go over the technologies used in building the user service, it’s dependencies, structure, docker setup, and environment variables.
 
 ### Internal dependencies
@@ -358,7 +358,7 @@ EMAIL_SERVER_SENDER_EMAIL=
 EMAIL_SERVER_SENDER_PASSWORD=
 ```
 
-## Wishlist Service
+# Wishlist Service
 In this section, it will be presented the technologies used in building the wishlist service, its environment variables, dependencies,  docker setup, and an explanation of how the service was created.
 
 ### Technologies
@@ -391,7 +391,7 @@ From the server side perspective, when a client requests to read a specific wish
 
 Besides this, the user is also able to update their wishlist with products that are stored in the products service. However, if the user decides to erase their account, the wishlist associated to this account can be removed as well from the database.
 
-## Friend Service
+# Friend Service
 In this section, we’ll go over the technologies used in building the friends service, its dependencies, environment variables,  docker setup, and an explanation of how the service was created.
 
 ### Technologies
