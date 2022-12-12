@@ -16,29 +16,20 @@ Defining when we need synchronous communiaction; when service A needs feedback w
 In cases where service A does not need feedback, we considered asynchronous communication.
 
 For brokerless synchronous communication, we considered REST API and gRPC, both over HTTP.
-Speed was considered, however as both REST and gRPC support HTTP 2, the differences would be negligible, if any. Decision was taken to use REST API for communcation between services that needed to be synchronous. The reasons being simplicity, technological know-how, and we did not need streaming and bidirectional communication.
-
-For brokered synchronous communication, we chose to use Redis Pub/Sub.
-```DOUBLE CHECK HERE AND IF CORRECT THAT IT IS SYNC WE NEED MORE HERE```
+Speed was considered, however as both REST and gRPC support HTTP 2, the differences would be negligible, if any. Decision was taken to use REST API for communication between services that needed to be synchronous. The reasons being simplicity, technological know-how, and we did not need streaming and bidirectional communication.
 
 For asynchronous communication, we only considered Queue-based communication using Redis or RabbitMQ.
 The communication between the product service and the SFTP server use RabbitMQ for communicating an event.
-Relevant pros and cons of each broker:
-RabbitMQ:
-(-) Maintenance
-(+) Fault tolerance
-(+) Flexibility
-(+) Reliability
-Redis:
-...
+Both brokers have many pros and cons, however there was a con with Redis that was a deal breaker for what we needed. Redis does not guarantee message delivery, and therefore we chose RabbitMQ.
+
 
 ## Deployment Decisions
 Our system created with a container base architecture- virtualization. It is an operating system level virtualization 
 for deploying and running application. Docker allows us, the developers, to build, run and distribute docker containers. 
 Docker helps to reduce complexity of networking between different services, volumes and databases. In addition, docker 
-has a public images that can be used by other developers, for example haproxy, redis, rabbitMq, and more. 
+has public images that can be used by other developers, for example haproxy, redis, rabbitMq, and more. 
 
-Docker improve the development experience, developers can just pull and run containers on their own machine without 
+Docker improves the development experience, developers can just pull and run containers on their own machine without 
 the concerns of installing new software. 
 In addition, all docker environment setup in the same way and to move image from development to preproduction and 
 production is fairly easy. 
@@ -60,8 +51,8 @@ with the same configuration as the local environment.
 
 Unlike Rest Api, Graphql and proxy, some of our services does not require quick response and can have "cold start", 
 while being executed from different events. Those services are deployed as serverless architectures which gives lower cost 
-and high computing power, but slower response after cool down. for example our mail service which responsible for sending 
-emails on specific events, but does not require instance response, is deployed on serverless architecture with Azure 
+and high computing power, but slower response after cool down. for example our email service which responsible for sending 
+emails on specific events, but does not require instantaneous response, is deployed on serverless architecture with Azure 
 Functions. The serverless architecture is used for running a single function, that can be decoupled from other parts of 
 the system, but can be triggered by different events. 
 
@@ -94,7 +85,7 @@ If we scale the products service horizontally and there is a message from the sf
 gets the message (for example in round-robin), will know that there is a new database. In addition, download new database, 
 will be an intensive process. 
 
-To answer thies issues, we implemented a Pub/Sub with RabbitMQ, that the SFTP publish a message to the exchange point 
+To answer these issues, we implemented a Pub/Sub with RabbitMQ, that the SFTP publish a message to the exchange point 
 about a new database to download, and all the products services are subscribers to that exchange, and they will download 
 the new database when the message arrives.
 ![products vs sftp](./overview_of_the_system/products-sftp-diagram.png)
@@ -146,15 +137,17 @@ In fact, we did first create an email service that received email requests from 
 #### Storage decisions
 Other significant decisions for the user service was how it would store both user text data and images for users.
 
-Why Neo4j?
-First, we started by ruling out document databases due to maintenance issues with many to many relationships. Therefore our choice was between a relational database and graph database.
-Ultimately, we decided on a graph database because of the following reasons:
-Graph databases can be more performant, especially when there are large amounts of many to many relationships.
-Relational databases follow a rigid structure, which is likely to result in slower development due to original database modeling and updates that would occur during development.
-Future scaling opportunities, relational databases are hard to scale.
-Possible feature updates, as we’re building a sort of social platform, if at some point we decide we want to create for example a friend suggestions feature. Traversing a graph database to see friends-of-friends will be much faster and easier than with a relational database.
+*Why Neo4j?*
 
-Why Azure blob storage?
+First, we started by ruling out document databases due to maintenance and synchronization issues with many to many relationships. Therefore our choice was between a relational database and graph database.
+Ultimately, we decided on a graph database because of the following reasons:
+- Graph databases can be more performant, especially when there are large amounts of many to many relationships.
+- Relational databases follow a rigid structure, which is likely to result in slower development due to original database modeling and updates that would occur during development.
+- Future scaling opportunities, relational databases are hard to scale.
+- Possible feature updates, as we’re building a sort of social platform, if at some point we decide we want to create for example a friend suggestions feature. Traversing a graph database to see friends-of-friends will be much faster and easier than with a relational database.
+
+*Why Azure blob storage?*
+
 First, we discarded the idea of storing the images locally in the user service, because the user service is running in a docker container and is not a valid option for persisting data.
 
 Second, we discarded the idea of storing the images as blobs in a database as it is hard to scale, slow, and expensive.
@@ -177,3 +170,33 @@ A more optimal solution was to use the concept of 'rooms' from socket.io, so tha
 In terms of scalability, the socket server can the be scaled horizontally by adding a a mechanism which can keep all the servers in sync. Socket.io provides different integrations such as Redis which would act as a message broker that would pass messages between each server. This way, if 2 friends are connected on 2 different servers, they will push the event to the Redis database which will redirect it to all the subscribed servers.
 
 ### Email Service
+The biggest choices that were discussed regarding the email service were the email service architecture, communication, and how generic it should be.
+
+#### Architecture
+As mentioned in the Architecture section of this document, and in the ```how_to``` document, the email service is a 
+serverless function within a function app in Azure. The reason for this is that the email service is not expected to be a busy service, and does not need to be fast. Its primary functionality at the moment is to send invitation emails, and as it is expected to be a relatively rare occasion for a user to send invitation email, compared to the applications other functionalities, we’re okay with it taking a bit of time. So as we’re okay with the architecture's main drawback, and the pros of this architecture being significant, the main one being that it will be very cost efficient, the choice was easy.
+
+#### Communication
+Briefly discussed in the user service section in this document, at the start of this project we discussed the idea of having the email service receiving email requests from a durable queue setup with RabbitMQ. 
+So the requests to the email service would be asynchronous, with such a setup, we’d have no reason to worry about speed, and we’d decouple this service from other services more distinctly.
+However, there were two problems with this approach, at first we had created the email service, sending email from a queue with RabbitMQ, 
+and when researching creating the service as an Azure function, we saw that it was 
+not possible to integrate an Azure function with RabbitMQ using consumable plan, at least not with NodeJS. 
+
+This in and of itself wasn't a reason to abandon asynchronous communication, 
+as we had an option of 
+refactoring the code to consume from a Azure Queue Storage with an azure queue trigger function. 
+
+However, there is a big user experience drawback with this approach, 
+if the email service fails for some reason, the user would think they sent the invitation, 
+while the invite might not be sent until a day or a few days later once the problem is realized and fixed. 
+Assuming that the queue storage would successfully persist the message that was supposed to be sent, this wouldn’t be a big issue, 
+however it is in our opinion, worse than the alternative HTTP trigger function approach.
+
+#### Generic abilities
+This sort of ties to the architectural approach for this function, it would’ve been quite easy to integrate a simple 
+email module within the user service and send invitation emails from the user service. 
+However, looking forward to possible future features of this application, for example sending birthday reminders, 
+wishlist update notifications, etc, this approach was considered significantly better. 
+Thinking even further, setting up the email service like this, keeping it as generic as we could manage, 
+it is as decoupled as we could imagine, making it easy to reuse the code for this service in other applications, or simply use the same function in other applications.

@@ -277,6 +277,13 @@ Redis is used for caching queries for the products service. to start container o
 # User Service
 In this section we’ll go over the technologies used in building the user service, it’s dependencies, structure, docker setup, and environment variables.
 
+### Pre-Requisites
+
+* Node
+* Docker
+* IDE / Code Editor
+* [Neo4j AuraDB Account and DB instance](https://neo4j.com/cloud/platform/aura-graph-database/)
+
 ### Internal dependencies
 The user service is built using NodeJS, with TypeScript and ExpressJS.
 User Service internal dependencies are as follows:
@@ -297,7 +304,15 @@ User Service internal dependencies are as follows:
 | rimraf              | 3.0.2       |
 
 
-These dependencies include both production dependencies and development dependencies. Most notable development dependencies are ts-node, ts-node-dev, and rimraf. Modules ts-node and ts-node-dev were imported for running TypeScript, and together offer cool functionalities such as ‘hot reload’, even when running inside docker containers. Command script for hot reload inside a docker container ```ts-node-dev --poll <path/app.ts>```. The module rimraf, was imported to properly get rid of the ```./build``` directory before rebuilding the project using the ```tsc``` command. We had some trouble rebuilding properly, so this module came to the rescue.
+These dependencies include both production dependencies and development dependencies. 
+Most notable development dependencies are ts-node, ts-node-dev, and rimraf. 
+Modules ts-node and ts-node-dev were imported for running TypeScript, and together offer cool functionalities such as ‘hot reload’, 
+even when running inside docker containers. 
+
+Command script for hot reload inside a docker container ```ts-node-dev --poll <path/app.ts>```. 
+
+The module rimraf, was imported to properly get rid of the ```./build``` directory before rebuilding the project using the ```tsc``` command. 
+We had some trouble rebuilding properly, so this module came to the rescue.
 
 ### Structure
 Structure src directory inside the user service
@@ -347,9 +362,46 @@ User service makes use of two docker compose files, one for development and one 
 we have ‘stages’ for development and production that instruct docker compose how to build the container. It will start 
 from the top down, first containerizing the development environment, and if instructed to run the production stage, 
 it will use the newly created ```./build``` directory from the development container, as the root project for the 
-production container, using only production dependencies.  
-For details, inspect the dockerfile in ```user-service``` in the module directory, and docker-compose.dev.yml and 
-docker-compose.yml/deployment-docker-compose.yml.
+production container, using only production dependencies.
+
+Dockerfile:
+```dockerfile
+FROM node:18-alpine as development
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+FROM node:18-alpine as production
+
+WORKDIR /usr/src/app
+
+COPY package*.json .
+
+RUN npm install --only=production
+
+COPY --from=development /usr/src/app/build ./build
+
+CMD ["node", "build/app.js"]
+```
+
+Then for specifying which stage to run, you set the 'target' in the docker compose file, example for development:
+```dockerfile
+    user-service-development:
+        build:
+          context: ./modules/user-service
+          target: development
+        environment:
+          - NODE_ENV=development
+          - ...
+        ...
+```
 
 ### External dependencies
 #### Neo4j:
@@ -363,8 +415,9 @@ user: ```userId, name, username, email and signupDate``` while the ```FRIENDS_WI
 relationship contains all relevant information about user relationships: ```status, and originatorUserId```.
 
 The ```status``` in relationship holds enum values found in ```FriendStatus.ts``` in the source code. 
-While ```originatorUserId```represents the user that sent a friend request to the other user. For further details, 
-see ```docs/documents/instructions.md```.
+While ```originatorUserId```represents the user that sent a friend request to the other user. 
+
+For further details, see ```docs/documents/instructions.md``` in the user service section.
 
 #### Azure blob storage:
 User service stores all user profile pictures in azure blob storage. Saving the files in the format ```<username>_profile-picture.png```.
@@ -373,6 +426,25 @@ The file format extension ```.png``` is hard coded.
 #### Email Service:
 User service uses an external dependency to send emails for when users want to invite other users to join the application.
 When/if a user accepts the invite, they will automatically be friends, persisted in the Neo4j database.
+
+### Security
+User service is already protected against unauthenticated users, however there were concerns with how the user service
+exposes endpoints that could manipulate other users in the application. 
+For example, an endpoint for updating or deleting a user, in order to protect users from each other, we set up the 
+middleware found in ```user-guard.ts```. 
+
+This middleware checks the users request body, and if the request includes a
+userId or username, both of which can be used to get, put, post and delete information. The guard will override the 
+appropriate fields with the userId or username of the user that sent the query.
+In some cases we want to be able to circumvent the guard, in these cases we have an array of routes that are allowed to 
+pass through the guard.
+
+Example query that would be intercepted, would be when a user tries to delete another user.
+If a user sends a request to delete another user, the user guard will swap out the userId in the request, replacing it 
+with the sender's userId, resulting in the user deleting themselves. 
+
+Although not the most refined approach and in future iterations we'd be pressed to refine it, we found it a bit funny as is.
+
 
 ### Environment variables needed for the user service
 ```text
@@ -405,6 +477,7 @@ These environmental variables have been created to hide the port number and the 
 
 ### Internal dependencies
 Wishlist Service is using the following internal dependencies:
+
 | Package name        | Version     |
 |---------------------|-------------|
 | express             | ^4.18.2     |
@@ -437,6 +510,7 @@ This environment variable has been created to hide the port number.
 
 ### Internal dependencies
 Friends Service is using the following internal dependencies:
+
 | Package name         | Version     |
 |----------------------|-------------|
 | express              | ^4.18.2     |
@@ -469,3 +543,129 @@ The other one is the existence of a socket room with the same id as the friend's
 Then, at the end of this event, another event will be emitted to the client, sending an array with the current social statuses. 
 
 The last event is triggered when a user closes the website. When this happens, the server will loop through the list of friends and will emit to all the online friends, the 'offline' status of the user. This action is executed only if the user has closed all the open tabs with this application including all the devices where is logged in.
+
+
+# Email Service
+The email service is a serverless function on Azure, a “Function application” consisting of a single function. This is the only service part of the expose part of the project that is not running within a docker container in Azure’s container registry.
+
+This service is set-up to be generic, meaning that the service could be re-used for other applications, as it does not contain any templates or the like. Receiving a request of sending an email, the request should contain three objects in JSON format:
+
+```JSON
+{
+   "sender": {
+       "email": "exampleEmail@gmail.com",
+       "password": "examplePassword"
+   },
+   "email": {
+       "to": "exampleEmail.2@gmail.com",
+       "subject": "subject string",
+       "html": "<p>html, as the email body</p>",
+       "text": "regular text, as the email body"
+   },
+   "notification": {
+       "email": "exampleEmail.3@gmail.com",
+       "onFailure": true,
+       "onSuccess": false
+   }
+}
+```
+
+As seen in this example request sent to the email service, the first object specifies the sender email. 
+This object specifies which email address the email service should send from, and is the only object that 
+ties the email service to this application. The service contains an array of ‘sender’ email addresses, 
+which consist of the sender email address and the password to be able to send an email with that email address.
+
+The second object specifies both to which email the service should send to, the emails subject, and body.
+
+The third object, is an option available to send a notification email as well as the ‘regular’ email, 
+notifying the email specified in the object about the email sent. The two fields ```onFailure, and onSuccess```, 
+specify whether a notification email should be sent if an sending the email to the ‘email’ object was successful, or if it was unsuccessful. 
+If the appropriate fields are set to true, the notification email includes errors or success messages 
+that occur when sending an email. An example notification email looks like this:
+
+```text
+This email address was registered to get this notification of an error that occurred in our email server. 
+Date: 2022-12-11T18:27:15.676Z
+
+Error Messages:
+";sender.email: \"invalidEmail@invalidEmail.invalidDomain\" does not exist"
+
+Information about the failed email: 
+{"to":"exampleEmail@gmail.com","subject":"Subject check","html":"
+something cool
+"}
+```
+
+In this example the sender email was invalid.
+
+An example response sent back from the email service to the 'client' that sent the email request:
+
+```JSON
+{
+   "success": [
+       "Valid Content",
+       "Authentication success",
+       "valid notification email",
+       "Emails accepted: [\"exampleNotificationEmail@gmail.com\"]"
+   ],
+   "errors": [
+       ";sender.email: \"invalidEmail@invalidEmail.invalidDomain\" does not exist"
+   ],
+   "sentEmails": [
+       {
+           "accepted": [
+               "exampleNotificationEmail@gmail.com"
+           ],
+           "rejected": [],
+           "messageTime": 561,
+           "messageSize": 865
+       }
+   ]
+}
+```
+
+## Security
+The method ```authLevel``` is set to ```function```. 
+Meaning that the security setup for the email service is quite simple at the moment, 
+where the only restrictions set for sending with the default email address is the 
+environment variable ```EMAIL_SERVER_ACCESS_TOKEN```, as used in the user service.
+
+Possible future security restrictions would include an html sanitizer, and as it is currently set up, 
+sender email addresses have the option to be restricted with an additional field ‘password’ in the ‘sender’ object. 
+However, this is more of an administration restriction than a security measurement.
+
+## Dependencies
+We only have one dependency that is being used by this service at the moment, which is the module ‘nodemailer’, version ‘6.8.0’. 
+Additional modules that are not being used but might be used in the future are ‘amqplib’ for RabbitMQ integration, and ‘node-html-parser’ for html sanitation.
+
+## Environment variables
+Environment variables used in the email service are set in the file ```local.settings.json```, and includes the following variables:
+```text
+"SMPT_HOST":
+"SMPT_PORT":
+"SMTP_USER":
+"SMPT_PASSWORD":
+"ERROR_EMAIL":
+"ERROR_PASSWORD":
+"NOTIFICATION_EMAIL":
+"NOTIFICATION_PASSWORD":
+```
+
+Furthermore, there is another file, that is gitignored, for emails that can be used in the ‘sender’ object. This file is named ```gmail-accounts.json``` and has the following structure:
+```
+{
+ "GMAIL_ACCOUNTS": [
+   {
+     "email": 
+     "password": 
+     "access_password": 
+   },
+   {
+     "email":
+     "password":
+   }
+ ]
+}
+```
+
+As seen here in this example, we can have a sender email account that has the fields email, and password or an optional additional field ```access_password```, which, if set, will not allow a sender to be used without the field ```password``` in the ‘sender’ object within the request to the email service. The field ```password``` here in ```gmail-accounts.json``` is the password created within gmail, to be able to send an email through their services with that account.
