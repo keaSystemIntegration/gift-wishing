@@ -9,10 +9,17 @@ const prisma = new PrismaClient()
 @Resolver()
 export class ProductResolver {
     @Query(() => [Product])
-    @CacheControl({ maxAge: 60 })
-    async Products() {
-        return prisma.products.findMany()
+    async Products(
+        @Arg('searchParam', { nullable: true }) searchParam: string
+    ) {
+        const search = searchParam
+            ? {
+                  name: { contains: searchParam },
+              }
+            : {}
+        return prisma.products.findMany({ where: search })
     }
+
     @Query(() => Product)
     @CacheControl({ maxAge: 60, scope: 'PUBLIC' })
     async Product(@Arg('id') id: string) {
