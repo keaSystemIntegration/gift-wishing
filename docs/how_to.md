@@ -42,7 +42,7 @@ frontend api_gateway
   use_backend friend-status-service if friends
 ```
 
-This 'frontend' is in charge of HTTP requests and redirects them to the proper service based on the root path used in the endpoint. Before that, however, the gateway executes the `lua.authorize` function in order to authorize access to the services. More explanations on this in the flow diagram.
+This 'frontend' is in charge of HTTP (`Port 80`) requests and redirects them to the proper service based on the root path used in the endpoint. Before that, however, the gateway executes the `lua.authorize` function in order to authorize access to the services. After that, it set a cookie with the user claims based on the decoded JWT. More explanations on this in the flow diagram.
 
 ```cfg
 frontend api_sftp
@@ -72,7 +72,7 @@ First off, we remove the root path from the request, for convenience purposes (t
 
 ![Proxy Flow](./overview_of_the_system/Proxy_Flow.png)
 
-The security checks from above take place inside the `authorization.lua` file. The core part of it can be seen below:
+The security checks from above take place inside the `authorization.lua` file. The core part of it can be seen below in the `authorize` function:
 
 ```lua
 local function authorize(txn)
