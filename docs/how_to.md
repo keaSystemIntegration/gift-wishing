@@ -784,3 +784,25 @@ Furthermore, there is another file, that is gitignored, for emails that can be u
 ```
 
 As seen here in this example, we can have a sender email account that has the fields email, and password or an optional additional field ```access_password```, which, if set, will not allow a sender to be used without the field ```password``` in the ‘sender’ object within the request to the email service. The field ```password``` here in ```gmail-accounts.json``` is the password created within gmail, to be able to send an email through their services with that account.
+
+## Integrate Friend Path
+
+Our client application is built with Nodejs using express which is serving static files (HTML, CSS, JS) for the frontend side.
+
+The purpose of integrating the friend path service is to offer us the functionality to display the online status of each friend when a user is on the website. Since the service is using the socket.io library, the process of integration has run smoothly.
+
+Once the connection with the server side is established (an authorization token is necessary), we were able to use the socket events to implement the online status feature.
+
+Firstly, the client has to send an event to the server every time when the page is loaded.
+
+Secondly, the client has to listen to 2 other events. One of them is responsible for updating the status of each user's friend. This event is sending back an array with friends and their current statuses which is used to display the feature for the user. The other event called 'refresh' is responsible to emit back another event named 'status' to server when is triggered.  This way, when an user becomes online or offline, they broadcast their new status to all their friends.
+
+## Integrate Wishes Service
+
+The purpose of integrating the wishes service was the provide us the functionality to manipulate products so that a user can add them into their wish list, remove them and access the wish list of their friends.
+
+When an user connects, the application sends a call to the server to fetch the wish list from the database and if the response is successful, the client will provide the data set to the user.
+
+If the user has any product in their wish list, they are able to remove them from the list. This action will trigger a call to the server which will contain the name of the product in the request body.
+
+The application has another call when it loads which has the purpose the fetch all the friends' wish lists of the user, so that when they click on a friend, they are redirected to the friend's wish list where they are only able to read the products.
