@@ -1,26 +1,9 @@
+During this project, one of the most important aspects that we learned was how to deploy a project using the microservice architecture. The process was quite time consuming and brought us a few challenges in terms of communication and development experience.
 
-What did you learn?
+We had constant internal meetings where we discussed certain aspects from the architecture of the system, to some minor implementation details between the services. Our coordination with the other team has been generally efficient, being able to establish and follow realistic deadlines and having a good communication in case of any doubts in terms of integration.
 
-What did you think of the idea of the work process?
+When it comes to developer experience, we could say that it was a good balance between the knowledge that we had already and the things that we had to learn in order to implement the whole system. This way, we were able to apply our previous expertise to setup the project, but we also had the opportunity to research and create functionalities using new technologies and integrate them into our system.
 
-What did you think of the result?
+One aspect that went different from what we expected was the communication between our groups in terms of integration, where we thought we would have more meetings to help each other integrate specific features each team developed. In the end, this was not necessary because the documentation that has been given to us helped us understand how to integrate with their system.
 
-Anything that went different from what you expected?
-
-Communication with the other team, and between each other, how did it go?
-Team meetings regular intervals.
-Tools to communicate between ourselves, and with other teams.
-
-We had to do stuff that didn't make much sense.
-
-Bad practices on purpose in order to learn integration.
-
--------
-
-During this project, one of the most important aspects that we learned was how to create a deployed server for an application using microservices architecture. The process was quite time consuming and brought us a few challenges in terms of communication and developer experience.
-
-We had constant internal meetings where we discussed from the architecture of the system until some minor implementation details between each service. Our coordination with the other team has been generally efficient, being able to establish and follow realistic deadlines and having a good communicate in case of any doubts in terms of integration.
-
-When it comes to developer experience, I could mention that it was a good balance between the knowledge that we had already and the things that we had to learn in order to implement the whole system. This way, we were able to use our knowledge to setup the project, but we also had the opportunity to research and create functionalities using new technologies and integrate them into our system.
-
-One aspect that went different from what I expected was the communication between our groups in terms of integration where I thought we will have more meetings to help each other to integrate specific features each team developed. In the end, this was not necessary because of the  documentation that has been given to us which helped us to understand how the API works. 
+However, perhaps, more meetings with the partner team might have accelerated the overall development process. That could be due to the fact that both teams were entirely focused on the exposure part throughout most of the development process. This is also caused by the project format itself, where both teams need to first expose a system, and then they both switch to integrating the other team's system. While this is not a big impediment, the scope of the exposure part of the project shifted the focus towards it a bit more, in comparison.

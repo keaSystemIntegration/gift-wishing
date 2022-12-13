@@ -2,7 +2,7 @@
 
 # Authors and Responsibilites
 
-Here we'll list which service each author was responsible for. Included in the responsibility of
+Here we are listing which service each author was responsible for. Included in the responsibility of
 a service is the communication to other services from their service, and data persistence if relevant.
 
 ## Gabriel Nicutari
