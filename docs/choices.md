@@ -205,6 +205,10 @@ it is as decoupled as we could imagine, making it easy to reuse the code for thi
 
 # INTEGRATION Choices
 
+## Auth 
+
+The dillema here was whether to integrate the `Auth Service` the partner group exposed to us, or use an already existing `Auth Provider`. In the end, having our `Client Application` communicate fully with the partner team's services, since there is a high possibility they have some inner rules that would only allow access through their own `Auth Service` (as it is in our case as well).
+
 ## Web scraper
 Main choices made for the web scraper were in regard to Architecture, programming language, and which web scraping
 library to use.
