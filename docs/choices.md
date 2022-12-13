@@ -158,6 +158,8 @@ Deciding on Azure vs other storage options, was simply a matter of preference an
 ### Wishlist Service
 For this service, we decided to go with a REST API since the server does not have to communicate with other services or execute complex queries that require to access specific object fields (some of the advantages of using GraphQL).
 
+Even though a REST API is slower than GraphQL in terms of speed and it has no self-documentation of the endpoints, it is easier to be built and maintained since it has better error reporting and it's very scalable and flexible. It is also independent from the client, so that any technologies can be used when developing these 2 parts.
+
 Another aspect we had to consider was the database type. We decided to use a documented database for this service since there is only one table/document (so no relationships/MySQL database) and, intuitively, no in depth queries(Graph Database) that could slow down the response time.
 
 ### Friends Service
