@@ -202,3 +202,21 @@ However, looking forward to possible future features of this application, for ex
 wishlist update notifications, etc, this approach was considered significantly better. 
 Thinking even further, setting up the email service like this, keeping it as generic as we could manage, 
 it is as decoupled as we could imagine, making it easy to reuse the code for this service in other applications, or simply use the same function in other applications.
+
+# INTEGRATION Choices
+
+## Web scraper
+Main choices made for the web scraper were in regard to Architecture, programming language, and which web scraping
+library to use.
+
+Architecture:
+As we don't expect this 'service' needing to be continuously running, and rather a function that should run periodically
+we wanted to make this scraper using Function as a Service. 
+
+Language and library:
+Most of the project is made with JavaScript, or NodeJS, and was partly the reason we chose to user Python, 
+as we wanted to do this service a bit differently. If this were a real company we would most likely have chosen to use 
+NodeJS in order to be consistent with language, and not needing developers to know many languages. The other reason
+was that we found good guides using Python, library choice was chosen based on the quality of guides and documentation
+made by the library developers/contributors.
+
