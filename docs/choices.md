@@ -203,7 +203,7 @@ wishlist update notifications, etc, this approach was considered significantly b
 Thinking even further, setting up the email service like this, keeping it as generic as we could manage, 
 it is as decoupled as we could imagine, making it easy to reuse the code for this service in other applications, or simply use the same function in other applications.
 
-# INTEGRATION Choices
+# Integration Choices
 
 ## Auth 
 
@@ -223,4 +223,13 @@ as we wanted to do this service a bit differently. If this were a real company w
 NodeJS in order to be consistent with language, and not needing developers to know many languages. The other reason
 was that we found good guides using Python, library choice was chosen based on the quality of guides and documentation
 made by the library developers/contributors.
+
+## Wishes service
+
+We have chosen to work with express library from Nodejs serving static files because of the possibility of having a fast setup and an easy and intuitive integration process. We agreed to work with these technologies since all of our developers team are familiar with HTML, CSS and JavaScript. Though, once we would start to implement more frontend features and have a more complex data manipulation, a frontend library or framework would suit better to maintain the state of the application such as React or Angular.
+
+## Friend path service
+
+The friend path service was another reason for us to use Nodejs serving static files since the integration process was quite straight forward. Also, the documentation from the exposing team was clear and provided a lot of valuable information on how to integrate the service.
+
 
