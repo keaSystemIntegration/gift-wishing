@@ -20,11 +20,59 @@ Our proxy service is responsible with the internet traffic management towards ou
 
 ### Configuration & Flow of Events
 
-...(config explanations)
+The proxy configuration consists of 'Frontend' (The API Gateway) and 'Backend' (Server) sections.
+
+```cfg
+frontend api_gateway
+  bind *:80
+  mode http
+  timeout client 60s
+
+  acl auth path_beg -i /auth
+  acl user path_beg -i /user
+  acl products path_beg -i /products
+  acl wishlist path_beg -i /wishlist
+  acl friends path_beg -i /socket.io
+
+  http-request lua.authorize
+  http-request set-header Cookie Claims=%[var(txn.user)]
+
+  use_backend auth-service if auth
+  use_backend user-service if user
+  use_backend products-service if products
+  use_backend wishlist-service if wishlist
+  use_backend friend-status-service if friends
+```
+
+This 'frontend' is in charge of HTTP requests and redirects them to the proper service based on the root path used in the endpoint. Before that, however, the gateway executes the `lua.authorize` function in order to authorize access to the services. More explanations on this in the flow diagram.
+
+```cfg
+frontend api_sftp
+  bind *:22
+  mode tcp
+  timeout client 60s
+  use_backend sftp-service
+```
+
+This 'frontend' takes care of SFTP requests, based on the port usage and redirect to the only available 'backend'.
+
+```cfg
+backend user-service
+  balance roundrobin
+  mode http
+  http-request replace-path /user(/)?(.*) /\2
+  acl authorized_routes path -m beg /invite/accept /user
+  acl post_req method POST
+  acl authorized var(txn.authorized) -m bool
+  http-request deny unless authorized || authorized_routes post_req
+  server user user-service:3000 check
+```
+
+This is one example of a 'backend', where we specify the type of backend, the load balancing type, the server used (based on the container name and its internally exposed port) and then other configurations mostly necessary for security.
+
+First off, we remove the root path from the request, for convenience purposes (the services wouldn't have to create an endpoint like [@GET]'/user/user', but instead just [@GET]'/user'), then we check whether the routes are authorized or not (The User Service has 2 paths that are already authorized - the ones used by Auth Service), and then finally, we check if our JWT verification passed, based on the result of the  `lua.authorize`.
 
 ![Proxy Flow](./overview_of_the_system/Proxy_Flow.png)
-
-...(flow explanations)
 
 ### Dependencies
 
