@@ -11,7 +11,15 @@ Purpose
 
 # Proxy
 
-..was built with HAProxy and Lua langauge (for more advanced configuration - like auth)
+This service was built using `HAProxy` and the `Lua Programming Language`, which we use to extend upon the features *HAProxy* offers.
+
+*HAProxy* is a free, open-source service that offers a high availability load balanced and reverse proxy for TCP and HTTP requests.
+
+*Lua* is a lightweight cross-platform programming language designed for embedded use in applications. It is written in ANSI C, which makes it highly portable.
+
+Our proxy service is responsible with the internet traffic management towards our other services. It sits directly between the client application and our microservice network. 
+
+![System diagram](./overview_of_the_system/System_Design.png)
 
 ### Pre-Requisites
 
@@ -19,20 +27,22 @@ Purpose
 -   IDE / Code Editor
 -   At least one running backend application
 
-### Functionalities & Flow of Events
+### Configuration & Flow of Events
+
+
 
 ### Dependencies
 
 Some of the dependencies necessary are shown below. This is only a summary of the major ones, because some of them have their own dependencies as well.
 
-| Dependency   |
-| ------------ |
-| lua          |
-| json.lua     |
-| base64.lua   |
-| mime.lua     |
-| openssl.lua  |
-| socket.lua   |
+| Dependency  |
+| ----------- |
+| lua         |
+| json.lua    |
+| base64.lua  |
+| mime.lua    |
+| openssl.lua |
+| socket.lua  |
 
 In order to install these dependencies, an install script is necessary, which will be executed when the docker image starts building.
 
@@ -44,7 +54,7 @@ JWT_SECRET=
 
 ### Docker Setup
 
-Following upon the explanation from the ***Dependencies*** section, the dockerfile initially downloads the *HAProxy* image and then copies our install script to the desination and executes it in order to install the dependencies.
+Following upon the explanation from the **_Dependencies_** section, the dockerfile initially downloads the _HAProxy_ image and then copies our install script to the desination and executes it in order to install the dependencies.
 
 Afterwards, our configuration files are copied as well and we finally launch our proxy.
 
@@ -66,9 +76,9 @@ ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["haproxy", "-f", "./haproxy.cfg"]
 ```
 
-Then, in the `docker-compose.yml` file: 
+Then, in the `docker-compose.yml` file:
 
-``` yml
+```yml
 services:
 .
 .
@@ -90,9 +100,11 @@ As far as the installation of the proxy is concerned, the service cannot work by
 $ docker-compose up --build
 ```
 
+\*Note: It is not necessary to specify the docker-compose file in the command above, since the CLI will use the default `docker-compose.yml` we have inside our project directory.
+
 ### Local Usage
 
-The service runs on both `Port 80` (HTTP) and `Port 22` (for SFTP), based on the environment set in the docker-compose.yml, and it is the only service that actually exposes its ports to the outside. The other services are, naturally, only accesible through the proxy.
+The service runs on both `Port 80` (_HTTP_) and `Port 22` (_SFTP_), based on the environment set in the docker-compose.yml, and it is the only service that actually exposes its ports to the outside. The other services are, naturally, only accesible through the proxy.
 
 # Auth Service
 
