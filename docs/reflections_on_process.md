@@ -17,7 +17,7 @@ Bad practices on purpose in order to learn integration.
 
 
 
-
+### Cristian
 During this project, one of the most important aspects that we learned was how to create a deployed server for an application using microservices architecture. The process was quite time consuming and brought us a few challenges in terms of communication and developer experience.
 
 We had constant internal meetings where we discussed from the architecture of the system until some minor implementation details between each service. Our coordination with the other team has been generally efficient, being able to establish and follow realistic deadlines and having a good communicate in case of any doubts in terms of integration.
