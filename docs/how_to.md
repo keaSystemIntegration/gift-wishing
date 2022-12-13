@@ -11,15 +11,17 @@ Purpose
 
 # Proxy
 
-This service was built using `HAProxy` and the `Lua Programming Language`, which we use to extend upon the features *HAProxy* offers.
+This service was built using `HAProxy` and the `Lua Programming Language`, which we use to extend upon the features _HAProxy_ offers.
 
-*HAProxy* is a free, open-source service that offers a high availability load balanced and reverse proxy for TCP and HTTP requests.
+_HAProxy_ is a free, open-source service that offers a high availability load balanced and reverse proxy for `TCP` and `HTTP` requests.
 
-*Lua* is a lightweight cross-platform programming language designed for embedded use in applications. It is written in ANSI C, which makes it highly portable.
+_Lua_ is a lightweight cross-platform programming language designed for embedded use in applications. It is written in `ANSI C`, which makes it highly portable.
 
-Our proxy service is responsible with the internet traffic management towards our other services. It sits directly between the client application and our microservice network. 
+Our proxy service is responsible with the internet traffic management towards our other services. It sits directly between the client application and our microservice network. Alongside that, it also acts as a `Firewall`, so as to prohibit unauthorized access to our services.
 
 ![System diagram](./overview_of_the_system/System_Design.png)
+
+... (maybe more explanations)
 
 ### Pre-Requisites
 
@@ -29,7 +31,11 @@ Our proxy service is responsible with the internet traffic management towards ou
 
 ### Configuration & Flow of Events
 
+...(config explanations)
 
+![Proxy Flow](./overview_of_the_system/Proxy_Flow.png)
+
+...(flow explanations)
 
 ### Dependencies
 
