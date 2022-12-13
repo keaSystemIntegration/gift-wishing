@@ -9,19 +9,105 @@ Purpose
 -   Used to do this in the overall system.
     Links to deployed version if applicable.
 
-# Auth Service
+# Proxy
 
-The Auth Service is given the purpose of providing the client application access to the rest of our services. It does that in synergy with the proxy service. The first endpoints the client would hit are the ones from this service. This would take place during the ***Sign In*** / ***Sign Up*** operations. After performing the aforementioned actions, the client receives an ***Authorization*** **token** to be used in other subsequent requests.
+..was built with HAProxy and Lua langauge (for more advanced configuration - like auth)
 
 ### Pre-Requisites
 
-* Node
-* Docker
-* IDE / Code Editor
-* [MongoDB Cloud Atlas Account](https://cloud.mongodb.com/)
-* MongoDB IP Address Whitelisting
+-   Docker
+-   IDE / Code Editor
+-   At least one running backend application
+
+### Functionalities & Flow of Events
+
+### Dependencies
+
+Some of the dependencies necessary are shown below. This is only a summary of the major ones, because some of them have their own dependencies as well.
+
+| Dependency   |
+| ------------ |
+| lua          |
+| json.lua     |
+| base64.lua   |
+| mime.lua     |
+| openssl.lua  |
+| socket.lua   |
+
+In order to install these dependencies, an install script is necessary, which will be executed when the docker image starts building.
+
+### Environment Variables
+
+```
+JWT_SECRET=
+```
+
+### Docker Setup
+
+Following upon the explanation from the ***Dependencies*** section, the dockerfile initially downloads the *HAProxy* image and then copies our install script to the desination and executes it in order to install the dependencies.
+
+Afterwards, our configuration files are copied as well and we finally launch our proxy.
+
+```dockerfile
+FROM haproxytech/haproxy-ubuntu:2.6
+
+WORKDIR /usr/local/etc/haproxy/
+COPY ./install.sh /usr/local/etc/haproxy/
+
+RUN sed -i -e 's/\r$//' ./install.sh
+RUN ["chmod", "+x", "/usr/local/etc/haproxy/install.sh"]
+RUN /usr/local/etc/haproxy/install.sh luaoauth
+
+COPY ./authorization.lua /usr/local/etc/haproxy/
+COPY ./base64.lua /usr/local/etc/haproxy/
+COPY ./haproxy.cfg /usr/local/etc/haproxy/
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["haproxy", "-f", "./haproxy.cfg"]
+```
+
+Then, in the `docker-compose.yml` file: 
+
+``` yml
+services:
+.
+.
+    proxy:
+        build: ./haproxy
+        ports:
+            - '80:80'
+            - '22:22'
+        environment:
+            - JWT_SECRET=${AUTH_SERVICE_JWT_SECRET}
+        restart: on-failure
+```
+
+### Local Installation
+
+As far as the installation of the proxy is concerned, the service cannot work by itself, so it is highly recommended to install it together with the other services through our docker setup:
+
+```bash
+$ docker-compose up --build
+```
+
+### Local Usage
+
+The service runs on both `Port 80` (HTTP) and `Port 22` (for SFTP), based on the environment set in the docker-compose.yml, and it is the only service that actually exposes its ports to the outside. The other services are, naturally, only accesible through the proxy.
+
+# Auth Service
+
+The Auth Service is given the purpose of providing the client application access to the rest of our services. It does that in synergy with the proxy service. The first endpoints the client would hit are the ones from this service. This would take place during the **_Sign In_** / **_Sign Up_** operations. After performing the aforementioned actions, the client receives an **_Authorization_** **token** to be used in other subsequent requests.
+
+### Pre-Requisites
+
+-   Node
+-   Docker
+-   IDE / Code Editor
+-   [MongoDB Cloud Atlas Account](https://cloud.mongodb.com/)
+-   MongoDB IP Address Whitelisting
 
 ### Server & Flow of Events
+
 The server was built using `Node` and `Express` as the core pieces, together with a few dependencies solely focused on the purpose of this service: Authentication.
 
 Below there will be shown the 2 main flows covered by this microservice. The flows illustrate other services as well, when necessary, in order to emphasize their the clarity and completeness.
@@ -30,7 +116,7 @@ Sign Up Flow:
 
 ![Signup_Flow](./overview_of_the_system/Signup_Flow.png)
 
-*Important note: This flow, ideally, works in sync with the `User Service`'s create user operation. Hence, we need to make sure that both services contain the same users at all times. Moreover, we cannot afford a delay (i.e. The User Service adds the newly created user from Auth Service later). For this to happen, the `Sign Up` should only complete when both transactions succeed in their own service.
+\*Important note: This flow, ideally, works in sync with the `User Service`'s create user operation. Hence, we need to make sure that both services contain the same users at all times. Moreover, we cannot afford a delay (i.e. The User Service adds the newly created user from Auth Service later). For this to happen, the `Sign Up` should only complete when both transactions succeed in their own service.
 
 Sign In Flow:
 
@@ -38,88 +124,91 @@ Sign In Flow:
 
 ### Dependencies
 
-| Package name        | Version     |
-|---------------------|-------------|
-| axios               | ^1.1.3      |
-| bcryptjs            | ^2.4.3      |
-| express             | ^4.18.2     |
-| jsonwebtoken        | ^8.5.1      |
-| mongoose            | ^6.7.2      |
-| dotenv              | ^16.0.3     |
+| Package name | Version |
+| ------------ | ------- |
+| axios        | ^1.1.3  |
+| bcryptjs     | ^2.4.3  |
+| express      | ^4.18.2 |
+| jsonwebtoken | ^8.5.1  |
+| mongoose     | ^6.7.2  |
+| dotenv       | ^16.0.3 |
 
 ### Database
-The database type used for this service was `NoSQL`, precisely a `Document Database`: ***MongoDB***.
+
+The database type used for this service was `NoSQL`, precisely a `Document Database`: **_MongoDB_**.
 
 First and foremost, a cluster needs to be created on your Cloud Atlas account. Then you can create a database and then a collection, which, for this service, is the only one we actually need.
 
 Inside the Express server, we connect to the database using `mongoose`, which is a MongoDB Object Modelling Tool. We do this using the connection string provided by our cluster as follows:
 
-``` javascript
-import mongoose from 'mongoose';
+```javascript
+import mongoose from 'mongoose'
 
 const mongoURI = `mongodb+srv://${process.env.AUTH_SERVICE_MONGO_USERNAME}:${process.env.AUTH_SERVICE_MONGO_PASSWORD}
-@gift-wish-auth.rpteshg.mongodb.net/${process.env.AUTH_SERVICE_MONGO_DATABASE}?retryWrites=true&w=majority`;
+@gift-wish-auth.rpteshg.mongodb.net/${process.env.AUTH_SERVICE_MONGO_DATABASE}?retryWrites=true&w=majority`
 
 try {
-  mongoose.connect(mongoURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  });
+    mongoose.connect(mongoURI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    })
 
-  mongoose.connection.on('connected', () => {
-    console.log('Successfully connected to the mongo db instance');
-  });
+    mongoose.connection.on('connected', () => {
+        console.log('Successfully connected to the mongo db instance')
+    })
 } catch (error) {
-  console.log('Unable to connect to the database:', error);
+    console.log('Unable to connect to the database:', error)
 }
 ```
 
 After that, we need to define our `AuthUser` schema inside our server following the document format:
 
-``` javascript
+```javascript
 _id: ObjectId(String),
 email: String,
 name: String,
 username: String,
 password: String
 ```
-*Note: `_id` is implicit and doesn't have to be manually set in an `AuthUser` object. The other fields are required.
+
+\*Note: `_id` is implicit and doesn't have to be manually set in an `AuthUser` object. The other fields are required.
 
 Once the setup is done, we can access an `AuthUser` model in our application like so:
 
-``` javascript
-import mongoose from 'mongoose';
+```javascript
+import mongoose from 'mongoose'
 
-const AuthUser = mongoose.model('AuthUser');
+const AuthUser = mongoose.model('AuthUser')
 ```
 
 We will use this model to perform operations on our database. An example showing how to create a document inside our `authusers` collection:
 
-``` javascript
-const authUser = new AuthUser({ email, password, username, name });
+```javascript
+const authUser = new AuthUser({ email, password, username, name })
 
-await authUser.save();
+await authUser.save()
 ```
 
-Not only that, but we can also use the model to automate certain functionalities (e.g. Password Hashing), or add methods to it (e.g. Compare Passwords). I will show the first example: 
+Not only that, but we can also use the model to automate certain functionalities (e.g. Password Hashing), or add methods to it (e.g. Compare Passwords). I will show the first example:
 
-``` javascript
+```javascript
 authUserSchema.pre('save', async function (next) {
-let user = this;
-if (!user.isModified('password')) {
-  return next;
-}
+    let user = this
+    if (!user.isModified('password')) {
+        return next
+    }
 
-try {
-  user.password = await cryptSync(user.password);
-  next();
-} catch (err) {
-  next(err);
-}
-});
+    try {
+        user.password = await cryptSync(user.password)
+        next()
+    } catch (err) {
+        next(err)
+    }
+})
 ```
 
 ### Environment Variables
+
 ```
 APPID=
 AUTH_SERVICE_MONGO_USERNAME=
@@ -129,9 +218,10 @@ AUTH_SERVICE_JWT_SECRET=
 ```
 
 ### Docker Setup
+
 The docker setup for this service is quite straight-forward. In a nutshell, all we need to do is use a node image (latest, preferably), copy the necessary files to the desired directory and then run the `install` and `start` commands.
 
-``` dockerfile
+```dockerfile
 FROM node:18-alpine
 
 WORKDIR /home/node/app
@@ -144,10 +234,10 @@ COPY . .
 CMD npm start
 ```
 
-Then, in the `docker-compose.yml` file: 
+Then, in the `docker-compose.yml` file:
 
-``` yml
-services: 
+```yml
+services:
 .
 .
   auth-service:
@@ -161,25 +251,28 @@ services:
 ```
 
 ### Local Installation
-Depending on whether you want to run the service by itself or together with all the other services, the installation can differ a bit. For a self-contained installation (not recommended), all you would have to do following the cloning of the repository would be: 
 
-``` bash
+Depending on whether you want to run the service by itself or together with all the other services, the installation can differ a bit. For a self-contained installation (not recommended), all you would have to do following the cloning of the repository would be:
+
+```bash
 $ cd modules/auth-service
 ```
-``` bash
+
+```bash
 $ npm install
 ```
 
 However, for a complete showcase, it is advisable to use the docker setup instead. So, after opening the repository in your code editor, execute:
-``` bash
+
+```bash
 $ docker-compose up --build
 ```
 
-*Note: It is not necessary to specify the docker-compose file in the command above, since the CLI will use the default `docker-compose.yml` we have inside our project directory.
+\*Note: It is not necessary to specify the docker-compose file in the command above, since the CLI will use the default `docker-compose.yml` we have inside our project directory.
 
 ### Local Usage
 
-This service runs on `Port 4500`, based on the environment set in the `docker-compose.yml` file, or on `Port 5000` by default. 
+This service runs on `Port 4500`, based on the environment set in the `docker-compose.yml` file, or on `Port 5000` by default.
 
 If trying to access the service through the proxy, you can do it following the flows illustrated towards the beginning of the section. You can also disregard the port, as everything is taken care of by docker, as long as it is properly configured.
 
