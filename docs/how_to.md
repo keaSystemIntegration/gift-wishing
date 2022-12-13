@@ -10,8 +10,6 @@ Our proxy service is responsible with the internet traffic management towards ou
 
 ![System diagram](./overview_of_the_system/System_Design.png)
 
-... (maybe more explanations)
-
 ### Pre-Requisites
 
 -   Docker
@@ -70,9 +68,59 @@ backend user-service
 
 This is one example of a 'backend', where we specify the type of backend, the load balancing type, the server used (based on the container name and its internally exposed port) and then other configurations mostly necessary for security.
 
-First off, we remove the root path from the request, for convenience purposes (the services wouldn't have to create an endpoint like [@GET]'/user/user', but instead just [@GET]'/user'), then we check whether the routes are authorized or not (The User Service has 2 paths that are already authorized - the ones used by Auth Service), and then finally, we check if our JWT verification passed, based on the result of the  `lua.authorize`.
+First off, we remove the root path from the request, for convenience purposes (the services wouldn't have to create an endpoint like `[@GET]'/user/user'`, but instead just `[@GET]'/user'`), then we check whether the routes are authorized or not (The User Service has 2 paths that are already authorized - the ones used by Auth Service), and then finally, we check if our JWT verification passed, based on the result of the `lua.authorize`.
 
 ![Proxy Flow](./overview_of_the_system/Proxy_Flow.png)
+
+The security checks from above take place inside the `authorization.lua` file. The core part of it can be seen below:
+
+```lua
+local function authorize(txn)
+  local hmacSecret = config.hmacSecret
+
+  -- 1. Decode and parse the JWT
+  local token = decodeJwt(txn, txn.sf:req_hdr("Authorization"))
+
+  if token == nil then
+    log("Token could not be decoded.")
+    goto out
+  end
+
+  -- Set a HAProxy variable for each field in the token payload
+  setVariablesFromPayload(txn, token.payloaddecoded)
+
+  -- 2. Verify the signature algorithm is supported (HS256, HS512, RS256)
+  if algorithmIsValid(token) == false then
+      log("Algorithm not valid.")
+      goto out
+  end
+
+  -- 3. Verify the signature with the certificate
+  if token.headerdecoded.alg == 'HS256' then
+    if hs256SignatureIsValid(token, hmacSecret) == false then
+      log("Signature not valid.")
+      goto out
+    end
+  elseif token.headerdecoded.alg == 'HS512' then
+    if hs512SignatureIsValid(token, hmacSecret) == false then
+      log("Signature not valid.")
+      goto out
+    end
+  end
+
+  -- 4. Set authorized variable
+  log("req.authorized = true")
+  txn.set_var(txn, "txn.authorized", true)
+
+  -- exit
+  do return end
+
+  -- way out. Display a message when running in debug mode
+::out::
+ log("req.authorized = false")
+ txn.set_var(txn, "txn.authorized", false)
+end
+```
 
 ### Dependencies
 
@@ -643,13 +691,13 @@ These environmental variables have been created to hide the port number and the 
 
 Wishlist Service is using the following internal dependencies:
 
-| Package name        | Version     |
-|---------------------|-------------|
-| express             | ^4.18.2     |
-| mongoose            | ^6.7.2      |
-| dotenv              | ^16.0.3     |
-| cookie-parser       | ^1.4.6      |
-| cors                | ^2.8.5      |
+| Package name  | Version |
+| ------------- | ------- |
+| express       | ^4.18.2 |
+| mongoose      | ^6.7.2  |
+| dotenv        | ^16.0.3 |
+| cookie-parser | ^1.4.6  |
+| cors          | ^2.8.5  |
 
 ### Docker setup
 
@@ -863,7 +911,7 @@ Once the connection with the server side is established (an authorization token 
 
 Firstly, the client has to send an event to the server every time when the page is loaded.
 
-Secondly, the client has to listen to 2 other events. One of them is responsible for updating the status of each user's friend. This event is sending back an array with friends and their current statuses which is used to display the feature for the user. The other event called 'refresh' is responsible to emit back another event named 'status' to server when is triggered.  This way, when an user becomes online or offline, they broadcast their new status to all their friends.
+Secondly, the client has to listen to 2 other events. One of them is responsible for updating the status of each user's friend. This event is sending back an array with friends and their current statuses which is used to display the feature for the user. The other event called 'refresh' is responsible to emit back another event named 'status' to server when is triggered. This way, when an user becomes online or offline, they broadcast their new status to all their friends.
 
 ## Integrate Wishes Service
 
