@@ -6,9 +6,9 @@ dotenv.config()
 const { SFTP_SERVICE_URL, SFTP_SERVICE_USERNAME, SFTP_SERVICE_PASSWORD } =
     process.env
 
-export const sftpConnection: ConnectOptions = {
+export const  sftpConnection: ConnectOptions = {
     host: SFTP_SERVICE_URL,
-    port: 22,
+    port: 7777,
     username: SFTP_SERVICE_USERNAME,
     password: SFTP_SERVICE_PASSWORD,
 }

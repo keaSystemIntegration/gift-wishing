@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:18
 RUN npm i -g pnpm
 WORKDIR /usr
 COPY package.json pnpm-lock.yaml  ./

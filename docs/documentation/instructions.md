@@ -94,6 +94,13 @@ Body:
 The products service is a service that expose for the user a graphql endpoint where it can fetch a list of products 
 or a single product by id. 
 After initialising the app the documentation for the graphql server can be found in http://$endpoint/products
+Please remember to add     
+
+```javascript
+headers: {
+    'Content-Type': 'application/json'
+}
+```
 
 The products are stored in a single table in the sql server. the structure is as following 
 
@@ -103,10 +110,13 @@ The products are stored in a single table in the sql server. the structure is as
 
 
 The database type is sqlite that exist inside the products service. If you would like to update the db and create new 
-entry you should follow the current schema that describe in the table above. 
+entry you should follow the current schema that describe in the table above.
+The product id is used as a reference to the product in other service. Be aware that if you decide to replace the content 
+of the table the other services would not be aware about the change. Therefor, we will recommend to **not** use a random 
+id such as uuid, and **instead** use an id that you can keep between databases creations, such as product link.
 To upload the new db you should access the sftp server and replace the current db file with your new file. The file name
 has to be named ``products.db``. The product service is listening to a que, and in a case that there is a new message in that
-que, it will download the new database file to the product service (view sequence diagram below)
+que, it will download the new database file to the product service (view sequence diagram below).
 
 The sftp service can be access on ${endpoint}:7777. The sftp server connected to a que (RabbitMQ) and in a case that the 
 ``products.db`` has been updated it will add a message to the que.

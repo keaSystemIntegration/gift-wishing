@@ -203,6 +203,7 @@ wishlist update notifications, etc, this approach was considered significantly b
 Thinking even further, setting up the email service like this, keeping it as generic as we could manage, 
 it is as decoupled as we could imagine, making it easy to reuse the code for this service in other applications, or simply use the same function in other applications.
 
+
 # Integration Choices
 
 ## Auth 

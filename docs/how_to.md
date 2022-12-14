@@ -407,7 +407,7 @@ The products service is using typescript that provides better development experi
 The Products service uses [Prisma](https://www.prisma.io/docs) as ORN which helps to create types for the data in the database.
 To get start with Prisma all that need to be specified is this part of the schema.Prisma
 
-```
+```prisma
 generator client {
   provider = "prisma-client-js"
   output = "./client"
@@ -439,7 +439,7 @@ change.
 
 To run the SFTP container, please install first Docker. After you install Docker, you can build the `Dockerfile` with
 
-`docker build --build-arg SFTP_SERVICE_USERNAME=${user} --build-arg SFTP_SERVICE_PASSWORD=${password} -t ${image-name} .`
+```docker build --build-arg SFTP_SERVICE_USERNAME=${user} --build-arg SFTP_SERVICE_PASSWORD=${password} -t ${image-name} .```
 
 and run it with
 

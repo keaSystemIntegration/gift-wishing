@@ -4,11 +4,15 @@ import { sftpConnection } from './sftp-client/sftp-client'
 import SftpClient from 'ssh2-sftp-client'
 import ampq from 'amqplib/callback_api'
 import { ApolloServer } from '@apollo/server'
-import { startStandaloneServer } from '@apollo/server/standalone'
 import responseCachePlugin from '@apollo/server-plugin-response-cache'
 import Keyv from 'keyv'
+import cors from 'cors'
 import { KeyvAdapter } from '@apollo/utils.keyvadapter'
+import {json} from 'body-parser'
 
+import express from 'express'
+import {expressMiddleware} from "@apollo/server/express4";
+import * as http from "http";
 dotenv.config()
 const PORT = parseInt(process.env.PRODUCTS_SERVICE_PORT!!) || 8080
 const rabbitMQServer = process.env.RABBITMQ_SERVICE_HOST || 'example.com'
@@ -43,6 +47,7 @@ ampq.connect(
                                 return sftp.list('/upload')
                             })
                             .catch((reason) => {
+                                console.log("connection to: ", sftpConnection)
                                 console.log(
                                     'error has been triggered by sftp server: ',
                                     reason
@@ -68,16 +73,24 @@ ampq.connect(
     }
 )
 
+const app = express()
+const httpServer = http.createServer(app);
 async function main() {
     const server = new ApolloServer({
         schema: await graphQLSchema,
         cache: new KeyvAdapter(new Keyv(redisUrl)),
         plugins: [responseCachePlugin()],
+
     })
-    const { url } = await startStandaloneServer(server, {
-        listen: { port: PORT },
-    })
-    console.log(`🚀  Server ready at: ${url}`)
+    await server.start()
+    app.use("/products", cors(), json(), expressMiddleware(server) )
+    // const { url } = await startStandaloneServer(server, {
+    //     listen: { port: PORT },
+    // })
+    // console.log(`🚀  Server ready at: ${url}`)
 }
 
-main().then()
+main().then(()=> {
+    httpServer.listen({ port: PORT })
+    console.log(`🚀 Server ready at http://localhost:${PORT}/products`)
+})
