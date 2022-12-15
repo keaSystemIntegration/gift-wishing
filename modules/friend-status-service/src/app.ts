@@ -10,6 +10,10 @@ const server = http.createServer(app);
 
 // app.use(express.static("public"));
 app.use(cookieParser());
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  next();
+});
 dotenv.config();
 
 const io = new Server<ClientToServerEvents, ServerToClientEvents> (server, {
