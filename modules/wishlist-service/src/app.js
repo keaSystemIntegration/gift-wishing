@@ -4,7 +4,11 @@ import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
-const app = express();
+const app = express({
+  cors: {
+    origin: "*",
+  },
+});
 
 const { WISHLIST_CONNECTION_URL, WISHLIST_SERVICE_PORT } = process.env;
 
@@ -16,9 +20,7 @@ db.once('open', () => console.log('Connected to Wishlist Mongo Database'));
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({
-  origin: '*'
-}));
+app.use(cors());
 
 import wishlistsRouter from './routes/wishlistRoutes.js';
 app.use('/', wishlistsRouter);

@@ -9,10 +9,17 @@ const app = express();
 const server = http.createServer(app);
 
 // app.use(express.static("public"));
-app.use(cors());
 app.use(cookieParser());
-
 dotenv.config();
+
+const io = new Server<ClientToServerEvents, ServerToClientEvents> (server, {
+  cors: {
+    origin: "*"
+  },
+  transports: ["polling", "websocket"]
+});
+
+app.use(cors());
 
 interface IFriend {
   username: string,
@@ -32,12 +39,6 @@ interface ServerToClientEvents {
 interface ClientToServerEvents {
   user_connected: (friendsList: IFriendsList) => void
 };
-
-const io = new Server<ClientToServerEvents, ServerToClientEvents> (server, {
-  cors: {
-    origin: "*"
-  }
-});
 
 function getFriendsStatusAndNotifyFriends(USER_SOCKET_ROOM: string, FRIENDS_LIST: any[], socket: Socket) {
   if ( FRIENDS_LIST.length ) {
