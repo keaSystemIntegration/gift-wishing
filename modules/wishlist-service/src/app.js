@@ -21,6 +21,10 @@ db.once('open', () => console.log('Connected to Wishlist Mongo Database'));
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors());
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  next();
+});
 
 import wishlistsRouter from './routes/wishlistRoutes.js';
 app.use('/', wishlistsRouter);
