@@ -29,6 +29,20 @@ userRoutes.get('/w-friends', async (req, res) => {
 	}
 });
 
+userRoutes.get('/friend-suggestions', async (req, res) => {
+	try{
+		const { userId } = req.body;
+		// Currently we're just returning all users with a limit of 150.
+		// But for future iterations, we expect this to change to be more user focused (e.g. friend suggestions)
+		// So for now we we'll include the userId in the query (as it is there by default due to the userGuard).
+		const dbResponse = await userService.getUsers(userId);
+		res.json(dbResponse);
+	} catch (e) {
+		console.log(`Error in userRoutes.get('/'): \n` + e.message);
+		res.status(500).send({error: e.message});
+	}
+});
+
 /**
  * Create User
  * Body

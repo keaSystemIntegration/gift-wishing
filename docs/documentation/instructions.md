@@ -394,7 +394,7 @@ Delete a user profile picture.
 ```{message: string}```
 
 
-### User Routes (5)
+### User Routes (6)
 **ROOT** /user
 **NOTE:** user routes will have duplicate substrings ```/user``` in the route.
 #### Endpoints
@@ -461,6 +461,25 @@ Get user with all their friends.
 ```User```
 
 **NOTE:** A user object has an optional field of a friends array which is not used except for at in this endpoint.
+
+##### Get user friend suggestions
+```/user/user/friend-suggestions```
+
+This is a temporary implementation to fix the logical flaw of not being able to get users other than the users friends. 
+This endpoint will return up to 150 users, chosen at random.
+In future iterations more sophisticated logic will be used to get users based on the user information, such as friend suggestions, as the name implies.
+
+**Input:**
+```
+{
+  userId?: string
+}
+```
+
+**Output:**
+```User[]```
+
+**NOTE:** User objects are without friends array field.
 
 # Email Service/Server
 Email server is currently deployed to Azure, part of a function application.

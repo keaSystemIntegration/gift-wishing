@@ -3,6 +3,26 @@ import User from "../models/User";
 
 
 export const userRepository = {
+	async getUsers(userId: string): Promise<User[]> {
+		const result = await neo4jConnection(
+			`
+				MATCH (user:USER) RETURN user LIMIT 150
+			`);
+		const users: User[] = [];
+		result.records.forEach(e => {
+			const userElement = e.get('user').properties;
+			const user: User = {
+				userId: userElement.userId,
+				name: userElement.name,
+				username: userElement.username,
+				email: userElement.email,
+				signupDate: userElement.signupDate
+			}
+			users.push(user);
+		});
+
+		return users;
+	},
 	async getUserById(userId: string): Promise<User | null> {
 		// Return user with userId
 		const result = await neo4jConnection(
