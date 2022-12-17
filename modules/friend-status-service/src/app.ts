@@ -1,7 +1,6 @@
 import express from "express";
 import http from "http";
 import dotenv from "dotenv";
-import cors from "cors";
 import { Server, Socket } from "socket.io";
 import cookieParser from 'cookie-parser';
 
@@ -10,20 +9,14 @@ const server = http.createServer(app);
 
 // app.use(express.static("public"));
 app.use(cookieParser());
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  next();
-});
 dotenv.config();
 
 const io = new Server<ClientToServerEvents, ServerToClientEvents> (server, {
   cors: {
-    origin: "*"
-  },
-  transports: ["polling", "websocket"]
+    origin: ["*"],
+    allowedHeaders: ["Authorization"]
+  }
 });
-
-app.use(cors());
 
 interface IFriend {
   username: string,
@@ -76,7 +69,8 @@ io.on("connection", (socket: Socket) => {
   let USER_SOCKET_ROOM = '';
   let FRIENDS_LIST: any = [];
 
-  socket.on("user_connected", ({friendsList}: IFriendsList) => {    
+  socket.on("user_connected", ({friendsList}: IFriendsList) => {  
+      
 
     const { userId, email } = JSON.parse(socket.handshake.headers.cookie?.split('=')[1] || '{}');
     
