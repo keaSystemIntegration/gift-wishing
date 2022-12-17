@@ -20,6 +20,7 @@ RUN ["chmod", "+x", "/usr/local/etc/haproxy/install.sh"]
 RUN /usr/local/etc/haproxy/install.sh luaoauth
 
 COPY ./authorization.lua /usr/local/etc/haproxy/
+COPY ./cors.lua /usr/local/etc/haproxy/
 COPY ./base64.lua /usr/local/etc/haproxy/
 COPY ./haproxy.cfg /usr/local/etc/haproxy/
 
