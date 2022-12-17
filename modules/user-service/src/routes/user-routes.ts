@@ -43,6 +43,17 @@ userRoutes.get('/friend-suggestions', async (req, res) => {
 	}
 });
 
+userRoutes.get('/search', async (req, res) => {
+	try{
+		const searchQuery  = req.query.searchQuery.toString();
+		const dbResponse = await userService.userSearch(searchQuery);
+		res.json(dbResponse);
+	} catch (e) {
+		console.log(`Error in userRoutes.get('/'): \n` + e.message);
+		res.status(500).send({error: e.message});
+	}
+});
+
 /**
  * Create User
  * Body

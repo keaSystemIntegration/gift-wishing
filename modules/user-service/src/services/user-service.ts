@@ -5,6 +5,10 @@ import { friendService } from "./friend-service";
 import { updateProfilePictureName } from "./profile-picture-service";
 
 export const userService = {
+	async userSearch(searchQuery: string): Promise<User[]> {
+		const users = await userRepository.userSearch(searchQuery);
+		return users;
+	},
 	async getUsers(userId: string): Promise<User[]> {
 		const users = await userRepository.getUsers(userId);
 		return users;

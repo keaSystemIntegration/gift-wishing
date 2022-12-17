@@ -481,6 +481,26 @@ In future iterations more sophisticated logic will be used to get users based on
 
 **NOTE:** User objects are without friends array field.
 
+##### Search for a user
+```/user/user/search```
+
+Search for a user with query parameters.
+Append ```?searchQuery=``` to the endpoint above with the search query string.
+The search will check for a user containing the search query in either their username or name.
+For example, in the ```Input``` example here below, the application will return an array of users that contain the search query; "usernameX" in either their username or name.
+
+**Search will return 50 users max.**
+
+**Input:**
+```
+/user/user/search?searchQuery=usernameX
+```
+
+**Output:**
+```User[]```
+
+**NOTE:** User objects are without friends array field.
+
 # Email Service/Server
 Email server is currently deployed to Azure, part of a function application.
 No integration is needed on this part of the application, however if something is not working and you want to rule it out as the culprit...
