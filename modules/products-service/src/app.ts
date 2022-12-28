@@ -83,7 +83,7 @@ async function main() {
 
     })
     await server.start()
-    app.use("/products", cors(), json(), expressMiddleware(server) )
+    app.use("/", cors(), json(), expressMiddleware(server) )
     // const { url } = await startStandaloneServer(server, {
     //     listen: { port: PORT },
     // })

@@ -7,6 +7,7 @@ services:
           cpus: '0.4'
           memory: '512M'
     image: giftwishingwe.azurecr.io/proxy
+    domainname: gift-wishing
     build: ./haproxy
 #        volumes:
 #          - ./haproxy:/usr/local/etc/haproxy
