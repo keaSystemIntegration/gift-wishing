@@ -9,8 +9,8 @@ export const userRepository = {
 			MATCH 
 				(user:USER)
 			WHERE 
-				user.name CONTAINS $query 
-				OR user.username CONTAINS $query 
+				toLower(user.name) CONTAINS toLower($query) 
+				OR toLower(user.username) CONTAINS toLower($query) 
 			RETURN user LIMIT 50
 			`,
 			{
