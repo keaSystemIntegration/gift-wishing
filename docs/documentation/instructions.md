@@ -21,7 +21,7 @@ using the email server on Azure and therefore you don't need to set it up locall
 
 ## Online Version
 
-This app can be found online at http://20.76.108.92/. 
+This app can be found online at http://gift-wishing.westeurope.azurecontainer.io/. 
 This version is hosted on Microsoft Azure.
 
 # Proxy 

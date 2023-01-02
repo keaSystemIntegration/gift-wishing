@@ -10,14 +10,24 @@ const prisma = new PrismaClient()
 export class ProductResolver {
     @Query(() => [Product])
     async Products(
-        @Arg('searchParam', { nullable: true }) searchParam: string
+        @Arg('searchParam', { nullable: true }) searchParam: string,
+        @Arg('pageSize', { nullable: true }) pageSize: number,
+        @Arg('pageNumber', { nullable: true }) pageNumber: number
     ) {
+        const page = pageNumber ?? undefined
+        const limit = pageSize ?? undefined
         const search = searchParam
             ? {
                   name: { contains: searchParam },
               }
             : {}
-        return prisma.products.findMany({ where: search })
+        console.log(page ?? (pageNumber ?? 0) * (pageSize ?? 0))
+
+        return prisma.products.findMany({
+            where: search,
+            skip: page ?? (pageNumber ?? 0) * (pageSize ?? 0),
+            take: limit,
+        })
     }
 
     @Query(() => Product)
