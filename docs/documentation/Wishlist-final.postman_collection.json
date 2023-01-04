@@ -1,0 +1,988 @@
+{
+	"info": {
+		"_postman_id": "f1cdd063-cbc0-4b47-bbac-cad7c80fc1f5",
+		"name": "Wishlist-final",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12724350"
+	},
+	"item": [
+		{
+			"name": "email-server",
+			"item": [
+				{
+					"name": "local",
+					"item": [
+						{
+							"name": "send invite",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"sender\": {\n        \"email\": \"aabragason@gmail.com\",\n        \"password\": \"OnlyForAstthorMyMan\"\n    },\n    \"email\": {\n        \"to\": \"astt0003@stud.kea.dk\",\n        \"subject\": \"Subject check\",\n        \"html\": \"<p>something cool</p>\",\n        \"text\": \"\"\n    },\n    \"notification\": {\n        \"email\": \"a.bragason@gmail.com\",\n        \"onFailure\": false,\n        \"onSuccess\": false\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:7071/api/Email-Service-HTTP",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "7071",
+									"path": [
+										"api",
+										"Email-Service-HTTP"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "remote",
+					"item": [
+						{
+							"name": "send invite",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"sender\": {\n        \"email\": \"invalidEmail@invalidEmail.invalidDomain\"\n    },\n    \"email\": {\n        \"to\": \"exampleEmail@gmail.com\",\n        \"subject\": \"Subject check\",\n        \"html\": \"<p>something cool</p>\",\n        \"text\": \"\"\n    },\n    \"notification\": {\n        \"email\": \"a.bragason@gmail.com\",\n        \"onFailure\": true,\n        \"onSuccess\": true\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://wishlist-email-service.azurewebsites.net/api/Email-Service-HTTP?code=0eTfDsSCYmFd8dqs2N9R5D0NE1IvbrV8Q4IC4EbQDcMQAzFuVSHevQ==",
+									"protocol": "https",
+									"host": [
+										"wishlist-email-service",
+										"azurewebsites",
+										"net"
+									],
+									"path": [
+										"api",
+										"Email-Service-HTTP"
+									],
+									"query": [
+										{
+											"key": "code",
+											"value": "0eTfDsSCYmFd8dqs2N9R5D0NE1IvbrV8Q4IC4EbQDcMQAzFuVSHevQ=="
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "proxy",
+			"item": [
+				{
+					"name": "user-service",
+					"item": [
+						{
+							"name": "friend-routes",
+							"item": [
+								{
+									"name": "by-email-or-userId",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "{{BEARER}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"email\": \"usera@gmail.com\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/user/friend/all",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"user",
+												"friend",
+												"all"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "by-status",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "{{BEARER}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"status\": \"ACCEPTED\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/user/friend/by-status",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"user",
+												"friend",
+												"by-status"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "invite-routes",
+							"item": [
+								{
+									"name": "send-invitation",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "{{BEARER}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userId\": \"04df08f9-ffa3-4508-ad64-d63dd782f97b\",\n    \"friendEmail\": \"a.bragason@gmail.com\"\n}\n",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/user/invite/send",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"user",
+												"invite",
+												"send"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "(AUTH ONLY)accept-invitation",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userId\": \"1aeff7b1-6802-44d7-bccd-d540ee851352\",\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpbnZpdGVVc2VySWQiOiI2Mzk0NzRiZjYxYjkzNDMxM2UxNjg2MjIiLCJmcmllbmRFbWFpbCI6ImEuYnJhZ2Fzb25AZ21haWwuY29tIiwiZnJpZW5kSWQiOiJiNjczYTFlNC04NzI1LTQxZjgtOWE1OS01YjQ2YTVjOGY0MWMiLCJpYXQiOjE2NzA2NzM4NzN9.-6NZi3z4y4JpLJLlCzCMYfHen4RbdtnBcc0aCfXB6Do\",\n    \"name\": \"Swifty\",\n    \"username\": \"Swifty Morty\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/user/invite/accept",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"user",
+												"invite",
+												"accept"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "user-routes",
+							"item": [
+								{
+									"name": "get-user",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"auth": {
+											"type": "noauth"
+										},
+										"method": "GET",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "{{BEARER}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userId\": \"wpadinwpdianwdpianwdpaiwndpawindapw\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/user/user",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"user",
+												"user"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "(AUTH ONLY)create-user",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userId\": \"ae6b9c20-70c3-4473-9f52-75d5fb3079f6\",\n    \"name\": \"uuid-user\",\n    \"username\": \"uuid-username\",\n    \"email\": \"uuidemail@gmail.com\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/user/user",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"user",
+												"user"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "update-user",
+									"request": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "{{BEARER}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userId\": \"63887b9e07760dedde280cb1\",\n    \"name\": \"somsomsomsomsaaaaa\",\n    \"username\": \"somsomsomsomsomaaaaa\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/user/user",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"user",
+												"user"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "delete-user",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userId\": \"722a5bf8-70bf-47ef-bae3-d84048e13f27\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/user/user",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"user",
+												"user"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "get-user-with-friends",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "{{BEARER}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userId\": \"wadawdawdawdascaw\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/user/user/w-friends",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"user",
+												"user",
+												"w-friends"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "friend-suggestions",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "{{BEARER}}",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{url}}/user/user/friend-suggestions",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"user",
+												"user",
+												"friend-suggestions"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "search",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "{{BEARER}}",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{url}}/user/user/search?searchQuery=SERNAME3",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"user",
+												"user",
+												"search"
+											],
+											"query": [
+												{
+													"key": "searchQuery",
+													"value": "SERNAME3"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "relationship-routes",
+							"item": [
+								{
+									"name": "create-relationship",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "{{BEARER}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userId\": \"6394773b61b934313e168624\",\n    \"friendId\": \"6385d13640ffcec4076b08bc\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/user/relationship",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"user",
+												"relationship"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "update-relationship",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userId\": \"04df08f9-ffa3-4508-ad64-d63dd782f97b\",\n    \"friendId\": \"e6eb2754-ea05-44a2-ab60-b7898df3b9f7\",\n    \"status\": \"REQUESTED\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/user/relationship",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"user",
+												"relationship"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "delete-relationship",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userId\": \"04df08f9-ffa3-4508-ad64-d63dd782f97b\",\n    \"friendId\": \"e6eb2754-ea05-44a2-ab60-b7898df3b9f7\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/user/relationship",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"user",
+												"relationship"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "profile-picture-routes",
+							"item": [
+								{
+									"name": "delete-profile-picture",
+									"request": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "{{BEARER}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"username\": \"someth\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/user/profile-picture",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"user",
+												"profile-picture"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "post-profile-picture",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "{{BEARER}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "formdata",
+											"formdata": [
+												{
+													"key": "file",
+													"type": "file",
+													"src": "/Users/astthor/Desktop/Screenshot 2022-12-07 at 22.42.34.png"
+												},
+												{
+													"key": "username",
+													"value": "temp_aabragason@gmail.com",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{url}}/user/profile-picture",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"user",
+												"profile-picture"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "get-profile-picture",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "{{BEARER}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "formdata",
+											"formdata": []
+										},
+										"url": {
+											"raw": "{{url}}/user/profile-picture/temp_aabragason@gmail.com",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"user",
+												"profile-picture",
+												"temp_aabragason@gmail.com"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "auth",
+					"item": [
+						{
+							"name": "Sign Up Friend",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Mzc4NzMwYTM0ZTNmNDAxZTk0MDM5ZjQiLCJlbWFpbCI6ImpvaG5fZG9lM0BnbWFpbC5jb20iLCJpYXQiOjE2Njg5MTU5Mzd9.xEAXq0FPT2anUi4Jig9kaB_-4WFVIAXGk8Nn1z-ObxU",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"a.bragason@gmail.com\",\r\n    \"username\": \"Swifty Morty\",\r\n    \"password\": \"pass12345\",\r\n    \"name\": \"Swiftyyyyyy\",\r\n    \"inviteToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpbnZpdGVVc2VySWQiOiI2Mzk0NzRiZjYxYjkzNDMxM2UxNjg2MjIiLCJmcmllbmRFbWFpbCI6ImEuYnJhZ2Fzb25AZ21haWwuY29tIiwiZnJpZW5kSWQiOiJiNjczYTFlNC04NzI1LTQxZjgtOWE1OS01YjQ2YTVjOGY0MWMiLCJpYXQiOjE2NzA2NzM4NzN9.-6NZi3z4y4JpLJLlCzCMYfHen4RbdtnBcc0aCfXB6Do\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/auth/signup",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"auth",
+										"signup"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Sign Up",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Mzc4NzMwYTM0ZTNmNDAxZTk0MDM5ZjQiLCJlbWFpbCI6ImpvaG5fZG9lM0BnbWFpbC5jb20iLCJpYXQiOjE2Njg5MTU5Mzd9.xEAXq0FPT2anUi4Jig9kaB_-4WFVIAXGk8Nn1z-ObxU",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"ss_233221@gmail.com\",\r\n    \"username\": \"ss_222221gmail.com\",\r\n    \"password\": \"pass12345\",\r\n    \"name\": \"ppic221\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/auth/signup",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"auth",
+										"signup"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Sign In",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Mzc4NzMwYTM0ZTNmNDAxZTk0MDM5ZjQiLCJlbWFpbCI6ImpvaG5fZG9lM0BnbWFpbC5jb20iLCJpYXQiOjE2Njg5MTU5Mzd9.xEAXq0FPT2anUi4Jig9kaB_-4WFVIAXGk8Nn1z-ObxU",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"ss_233221@gmail.com\",\r\n    \"password\": \"pass12345\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/auth/signin",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"auth",
+										"signin"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "wishlist",
+					"item": [
+						{
+							"name": "All Wishlists",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Mzc4NzMwYTM0ZTNmNDAxZTk0MDM5ZjQiLCJlbWFpbCI6ImpvaG5fZG9lM0BnbWFpbC5jb20iLCJpYXQiOjE2Njg5MTU5Mzd9.xEAXq0FPT2anUi4Jig9kaB_-4WFVIAXGk8Nn1z-ObxU",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/wishlist/all",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"wishlist",
+										"all"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Friends Wishlists",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Mzc4NzMwYTM0ZTNmNDAxZTk0MDM5ZjQiLCJlbWFpbCI6ImpvaG5fZG9lM0BnbWFpbC5jb20iLCJpYXQiOjE2Njg5MTU5Mzd9.xEAXq0FPT2anUi4Jig9kaB_-4WFVIAXGk8Nn1z-ObxU",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"friendsList\": [\"post-ID-example3\", \"6378730a34e3f401e94039f4\"]\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/wishlist/friends",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"wishlist",
+										"friends"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "User Wishlist",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MzliNzE1NzE3OTZiZGM3MzczYjAwOGYiLCJlbWFpbCI6ImNyaXNAZ21haWwuY29tIiwibmFtZSI6IkNyaXMgdGVzdCIsInVzZXJuYW1lIjoiQ3Jpc3RpYW4iLCJpYXQiOjE2NzExMzE0Nzl9.Bw-s9jBnhJljo4J62SAEwiMsv0JPQVDuAr7Ig-r_9Jo",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/wishlist",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"wishlist"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Products in Wishlist",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Mzc4NzMwYTM0ZTNmNDAxZTk0MDM5ZjQiLCJlbWFpbCI6ImpvaG5fZG9lM0BnbWFpbC5jb20iLCJpYXQiOjE2Njg5MTU5Mzd9.xEAXq0FPT2anUi4Jig9kaB_-4WFVIAXGk8Nn1z-ObxU",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"products\": [\r\n    {\r\n      \"name\": \"patch-name-example4\",\r\n      \"link\": \"patch-url-example4\",\r\n      \"subTitle\": \"subTitle\",\r\n      \"category\": \"category\",\r\n      \"subCategory\": \"subCategory\",\r\n      \"description\": \"description\",\r\n      \"overallRank\": 4.7,\r\n      \"price\": \"11.2\"\r\n    }\r\n  ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/wishlist/",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"wishlist",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "User Wishlist",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Mzc4NzMwYTM0ZTNmNDAxZTk0MDM5ZjQiLCJlbWFpbCI6ImpvaG5fZG9lM0BnbWFpbC5jb20iLCJpYXQiOjE2Njg5MTU5Mzd9.xEAXq0FPT2anUi4Jig9kaB_-4WFVIAXGk8Nn1z-ObxU",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/wishlist",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"wishlist"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "LOCAL",
+			"value": "localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "AZURE",
+			"value": "51.124.85.80",
+			"type": "string"
+		},
+		{
+			"key": "BEARER",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Mzg1ZGQyYmUxNWE2MGE2YmRkN2I3YTQiLCJlbWFpbCI6ImpvaG5fZG9lNjFAZ21haWwuY29tIiwibmFtZSI6IkpvaG4gRG9lIiwidXNlcm5hbWUiOiJKb2huRG9lNjEiLCJpYXQiOjE2Njk3MTcyOTF9.ZyOAkZgViQGoWLRZqvLYBTuUgkZiMvS0qU_hmjUuO6U",
+			"type": "string"
+		}
+	]
+}

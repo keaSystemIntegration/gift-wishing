@@ -21,8 +21,6 @@ export class ProductResolver {
                   name: { contains: searchParam },
               }
             : {}
-        console.log(page ?? (pageNumber ?? 0) * (pageSize ?? 0))
-
         return prisma.products.findMany({
             where: search,
             skip: page ?? (pageNumber ?? 0) * (pageSize ?? 0),
